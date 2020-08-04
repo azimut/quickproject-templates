@@ -1,6 +1,13 @@
 # quickproject-templates
 
-MIT licensed templates
+MIT licensed [quickproject](https://www.xach.com/lisp/quickproject/) templates
 
-* src-dir/ with a src/ dir
-* src-test-dir/ with a src/ dir and a fiveam test
+Assumes these env vars set:
+``` common-lisp
+(setq quickproject:*author* "azimut <azimut.github@protonmail.com>"
+      quickproject:*license* "MIT"
+      quickproject:*include-copyright* t)
+```
+
+| src-dir/      | .lisp under src/ subdir      |
+| src-test-dir/ | same as above, and t/ fiveam |
