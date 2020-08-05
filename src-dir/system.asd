@@ -1,7 +1,3 @@
-;;;; (#| TMPL_VAR name |#).asd(#| TMPL_IF copyright |#)
-;;
-;;;; (#| TMPL_VAR copyright |#)(#| /TMPL_IF |#)
-
 (asdf:defsystem #:(#| TMPL_VAR name |#)
   :description "Describe (#| TMPL_VAR name |#) here"
   :author "(#| TMPL_VAR author |#)"
