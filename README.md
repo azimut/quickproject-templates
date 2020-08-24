@@ -9,5 +9,6 @@ Assumes these env vars set:
       quickproject:*include-copyright* t)
 ```
 
-| src-dir/      | .lisp under src/ subdir      |
-| src-test-dir/ | same as above, and t/ fiveam |
+| src-dir/      | .lisp under src/ subdir         |
+| src-test-dir/ | same as above, and t/ parachute |
+| src-bin-dir/  | binary build with deploy        |
