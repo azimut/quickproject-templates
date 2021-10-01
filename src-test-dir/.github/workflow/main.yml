@@ -1,0 +1,15 @@
+name: Build (#| TMPL_VAR name |#)
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: 40ants/setup-lisp@v1
+        with:
+          asdf-system: (#| TMPL_VAR name |#)
+      - uses: 40ants/run-tests@v2-beta
+        with:
+          asdf-system: (#| TMPL_VAR name |#)
