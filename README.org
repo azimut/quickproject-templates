@@ -15,5 +15,5 @@
 
 ** See Also
 
-   [[https://github.com/fisxoj/fishproject][fisxoj/fishproject]] - fiveam, travis
-   [[https://github.com/maruks/quickproject-templates][maruks/quickproject-templates]] - fiasco or cacau with assert-p
+   - [[https://github.com/fisxoj/fishproject][fisxoj/fishproject]] - fiveam, travis
+   - [[https://github.com/maruks/quickproject-templates][maruks/quickproject-templates]] - fiasco or cacau with assert-p
