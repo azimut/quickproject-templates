@@ -12,8 +12,8 @@
 strip:
 	find . -name '*.so*' -exec strip {} \;
 
-zip:
-	zip -r ../(#| TMPL_VAR name |#).zip .
+tar:
+	tar cvf ../(#| TMPL_VAR name |#).tar ../bin --transform s/bin/(#| TMPL_VAR name |#)/
 
 clean:
 	rm -v -f ../(#| TMPL_VAR name |#).zip
@@ -21,4 +21,5 @@ clean:
 	rm -v -f ./(#| TMPL_VAR name |#)
 
 run:
+	chmod +x ./(#| TMPL_VAR name |#)
 	LD_PRELOAD="$(shell echo ./*.so*)" ./(#| TMPL_VAR name |#)
