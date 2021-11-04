@@ -10,11 +10,9 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: APK build deps
-        run: |
-          apk add --no-cache ca-certificates curl openssl make gcc musl-dev linux-headers gnupg patch zlib-dev zlib-static git tar bash xz openssh-client-common zstd
+      - name: APK build and actions/cache deps
+        run: apk add --no-cache ca-certificates curl openssl make gcc musl-dev linux-headers gnupg patch zlib-dev zlib-static git tar zstd tar zstd
 
-      # CACHE
       - run: mkdir -pv ~/build
       - name: Get Current Month
         id: current-month
@@ -31,7 +29,6 @@ jobs:
             ~/.cache/common-lisp
           key: "${{ steps.current-month.outputs.value }}-${{ env.cache-name }}-${{ runner.os }}"
 
-      # BUILD
       - name: Build SBCL 2.1.9
         run: |
           export SBCL_ARCH=x86-64
@@ -106,6 +103,9 @@ jobs:
           path: |
             /tmp/sbcl-(#| TMPL_VAR name |#)
 
+      - name: Alpine DEBUG SHELL deps
+        run: apk add --no-cache --force-broken-world bash xz openssh-client-common
+        if: ${{ failure() }}
       - name: DEBUG SHELL
         uses: seemethere/action-tmate@skip_dependency_installation
         if: ${{ failure() }}
