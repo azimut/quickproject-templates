@@ -4,7 +4,7 @@ on: [push]
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
 
@@ -20,8 +20,7 @@ jobs:
 
       - name: Get Current Month
         id: current-month
-        run: |
-          echo "::set-output name=value::$(date -u "+%Y-%m")"
+        run: echo "::set-output name=value::$(date -u "+%Y-%m")"
       - name: Cache SBCL Setup
         id: cache
         uses: actions/cache@v2
@@ -59,13 +58,11 @@ jobs:
           cd ~/Downloads
           export PATH="$HOME/sbcl/bin:${PATH}"
           wget https://beta.quicklisp.org/quicklisp.lisp
-          sbcl --disable-debugger \
+          sbcl --non-interactive \
                --eval '(load "quicklisp.lisp")' \
                --eval '(quicklisp-quickstart:install)' \
                --eval '(ql-util:without-prompting (ql:add-to-init-file))' \
-               --eval '(ql:update-all-dists)' \
-               --eval '(ql-dist:install-dist "http://bodge.borodust.org/dist/org.borodust.bodge.txt" :replace t :prompt nil)' \
-               --quit
+               --eval '(ql:update-all-dists)'
         if: steps.cache.outputs.cache-hit != 'true'
 
       - name: Build Binary
@@ -76,6 +73,10 @@ jobs:
 
       - uses: actions/upload-artifact@v2
         with:
-          name: (#| TMPL_VAR name |#)-linux
+          name: (#| TMPL_VAR name |#)-linux-x86_64
           path: bin/
           if-no-files-found: error
+
+      - name: DEBUG SHELL
+        uses: mxschmitt/action-tmate@v3
+        if: ${{ failure() }}
