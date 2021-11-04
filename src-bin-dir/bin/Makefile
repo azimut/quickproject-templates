@@ -1,13 +1,12 @@
 .PHONY: strip zip clean run
 
 (#| TMPL_VAR name |#):
-	sbcl --disable-debugger \
+	sbcl --non-interactive \
              --eval '(load "~/quicklisp/setup.lisp")' \
              --eval '(ql:quickload :deploy)' \
              --load ../(#| TMPL_VAR name |#).asd \
              --eval '(ql:quickload :(#| TMPL_VAR name |#))' \
-             --eval '(asdf:make :(#| TMPL_VAR name |#) :force t)' \
-             --quit
+             --eval '(asdf:make :(#| TMPL_VAR name |#) :force t)'
 
 strip:
 	find . -name '*.so*' -exec strip {} \;
@@ -21,5 +20,4 @@ clean:
 	rm -v -f ./(#| TMPL_VAR name |#)
 
 run:
-	chmod +x ./(#| TMPL_VAR name |#)
 	LD_PRELOAD="$(shell echo ./*.so*)" ./(#| TMPL_VAR name |#)
