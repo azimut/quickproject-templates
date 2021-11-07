@@ -1,6 +1,6 @@
-.PHONY: strip zip clean run dynamic static
+.PHONY: strip zip clean run deploy standalone
 
-dynamic:
+deploy:
 	sbcl --non-interactive \
              --eval '(load "~/quicklisp/setup.lisp")' \
              --eval '(ql:quickload :deploy)' \
@@ -8,11 +8,13 @@ dynamic:
              --eval '(deploy:define-library CL-OPENGL-BINDINGS::OPENGL :dont-deploy t)' \
              --eval '(asdf:make :(#| TMPL_VAR name |#)/deploy :verbose t :force t)'
 
-static:
-	SBCL_HOME=/usr/local/lib/sbcl /usr/local/bin/sbcl --non-interactive \
-              --eval '(load "~/quicklisp/setup.lisp")' \
-              --eval '(ql:quickload :(#| TMPL_VAR name |#)/static)' \
-              --eval '(asdf:make :(#| TMPL_VAR name |#)/static :verbose t :force t)'
+standalone:
+	SBCL_HOME=/usr/local/lib/sbcl \
+	/usr/local/bin/sbcl \
+	     --non-interactive \
+             --eval '(load "~/quicklisp/setup.lisp")' \
+             --eval '(ql:quickload :(#| TMPL_VAR name |#)/static)' \
+             --eval '(asdf:make :(#| TMPL_VAR name |#)/static :verbose t :force t)'
 
 strip:
 	find . -name '*.so*' -exec strip {} \;
