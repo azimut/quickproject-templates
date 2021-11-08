@@ -2,7 +2,7 @@ SBCL:=/usr/bin/sbcl
 SBCL_HOME:=/usr/lib/sbcl
 export SBCL_HOME
 
-.PHONY: strip zip clean run deploy standalone
+.PHONY: strip clean run deploy standalone
 
 deploy:
 	$(SBCL) \
