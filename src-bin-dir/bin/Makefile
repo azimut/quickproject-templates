@@ -1,7 +1,12 @@
+SBCL:=/usr/bin/sbcl
+SBCL_HOME:=/usr/lib/sbcl
+export SBCL_HOME
+
 .PHONY: strip zip clean run deploy standalone
 
 deploy:
-	sbcl --non-interactive \
+	$(SBCL) \
+	     --non-interactive \
              --eval '(load "~/quicklisp/setup.lisp")' \
              --eval '(ql:quickload :deploy)' \
              --eval '(ql:quickload :(#| TMPL_VAR name |#)/deploy)' \
@@ -9,8 +14,7 @@ deploy:
              --eval '(asdf:make :(#| TMPL_VAR name |#)/deploy :verbose t :force t)'
 
 standalone:
-	SBCL_HOME=/usr/local/lib/sbcl \
-	/usr/local/bin/sbcl \
+	$(SBCL) \
 	     --non-interactive \
              --eval '(load "~/quicklisp/setup.lisp")' \
              --eval '(ql:quickload :(#| TMPL_VAR name |#)/static)' \
