@@ -21,7 +21,7 @@ jobs:
         id: cache
         uses: actions/cache@v2
         env:
-          cache-name: cache-alpine-static-sbcl-2.1.9-basic
+          cache-name: cache-sbcl-2.1.9-alpine-(#| TMPL_VAR name |#)
         with:
           path: |
             ~/build

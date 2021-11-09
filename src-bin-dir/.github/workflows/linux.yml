@@ -27,7 +27,7 @@ jobs:
         id: cache
         uses: actions/cache@v2
         env:
-          cache-name: cache-sbcl-compressed
+          cache-name: cache-sbcl-2.1.9-(#| TMPL_VAR name |#)
         with:
           path: |
             ~/Downloads/
