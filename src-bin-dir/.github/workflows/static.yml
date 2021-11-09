@@ -6,12 +6,9 @@ jobs:
   container:
     runs-on: ubuntu-latest
     container:
-      image: clfoundation/sbcl:alpine3.14
+      image: molochwalker/gantoo:musl
     steps:
       - uses: actions/checkout@v2
-
-      - name: APK build and actions/cache deps
-        run: apk add --no-cache ca-certificates curl openssl make gcc musl-dev linux-headers gnupg patch zlib-dev zlib-static git tar zstd tar
 
       - run: mkdir -pv ~/build
       - name: Get Current Month
@@ -21,7 +18,7 @@ jobs:
         id: cache
         uses: actions/cache@v2
         env:
-          cache-name: cache-sbcl-2.1.9-alpine-(#| TMPL_VAR name |#)
+          cache-name: cache-sbcl-2.1.9-musl-(#| TMPL_VAR name |#)
         with:
           path: |
             ~/build
@@ -29,23 +26,12 @@ jobs:
             ~/.cache/common-lisp
           key: "${{ steps.current-month.outputs.value }}-${{ env.cache-name }}-${{ runner.os }}"
 
-      - name: Build SBCL 2.1.9
-        run: |
-          export SBCL_ARCH=x86-64
-          cd ~/build/
-          git clone -b static-executable-v2-2.1.9 https://github.com/daewok/sbcl
-          cd sbcl/
-          git fetch
-          sh make.sh --fancy --with-sb-linkable-runtime --with-sb-prelink-linkage-table
-          mkdir -vp ~/build/binary
-          INSTALL_ROOT=~/build/binary sh install.sh
-        if: steps.cache.outputs.cache-hit != 'true'
-
       - name: First time Install quicklisp
         run: |
-          cd ~/build/sbcl
+          cd ~/build
           wget https://beta.quicklisp.org/quicklisp.lisp
-          sh run-sbcl.sh --non-interactive \
+          source /etc/profile
+          sbcl --non-interactive \
                --eval '(load "quicklisp.lisp")' \
                --eval '(quicklisp-quickstart:install)' \
                --eval '(ql-util:without-prompting (ql:add-to-init-file))' \
@@ -54,28 +40,26 @@ jobs:
 
       - name: STEP 1 - Dump .core and .sexp
         run: |
-          cd ~/build/sbcl
-          sh run-sbcl.sh --non-interactive \
+          source /etc/profile
+          sbcl --non-interactive \
             --load ~/quicklisp/setup.lisp \
-            --eval '(ql:quickload :deploy)' \
-            --eval '(require :asdf)' \
-            --load "$RUNNER_WORKSPACE"/(#| TMPL_VAR name |#)/(#| TMPL_VAR name |#).asd \
+            --eval "(pushnew \"$PWD/../\" ql:*local-project-directories*)" \
             --eval '(ql:quickload :(#| TMPL_VAR name |#))' \
-            --load tools-for-build/dump-linkage-info.lisp \
+            --load /usr/lib/sbcl/tools-for-build/dump-linkage-info.lisp \
             --eval '(sb-dump-linkage-info:dump-to-file "/tmp/linkage-info.sexp")' \
-            --eval '(sb-ext:save-lisp-and-die "/tmp/sb-tester.core")'
+            --eval '(sb-ext:save-lisp-and-die "/tmp/sb-gmp-tester.core")'
           ls -l /tmp
 
       - name: STEP 2 - Compile .o and static-sbcl
         run: |
-          cd ~/build/sbcl
-          sh run-sbcl.sh --script tools-for-build/create-linkage-table-prelink-info-override.lisp \
+          source /etc/profile
+          sbcl --script /usr/lib/sbcl/tools-for-build/create-linkage-table-prelink-info-override.lisp \
               /tmp/linkage-info.sexp \
               /tmp/linkage-table-prelink-info-override.c
           ls -l /tmp
           while read l; do \
             echo "$l"; eval "export ${l%%=*}=\"${l#*=}\""; \
-          done < ~/build/binary/lib/sbcl/sbcl.mk
+          done < /usr/lib/sbcl/sbcl.mk
           env | sort
           set -x
           $CC $CFLAGS -Wno-builtin-declaration-mismatch \
@@ -83,33 +67,29 @@ jobs:
               -c /tmp/linkage-table-prelink-info-override.c
           $CC -no-pie -static $LINKFLAGS \
               -o /tmp/static-sbcl \
-              ~/build/binary/lib/sbcl/$LIBSBCL \
+              /usr/lib/sbcl/$LIBSBCL \
               /tmp/linkage-table-prelink-info-override.o \
-               $LIBS
+              $LIBS -lc
           ls -l /tmp
 
       - name: STEP 3 - Run static-sbcl, with .core, and dump final binary
         run: |
           /tmp/static-sbcl \
-            --core /tmp/sb-tester.core \
+            --core /tmp/sb-gmp-tester.core \
             --non-interactive \
-            --eval '(sb-ext:save-lisp-and-die "/tmp/(#| TMPL_VAR name |#)" :executable t :toplevel (lambda () ((#| TMPL_VAR name |#):start)) :compression t)'
+            --eval '(sb-ext:save-lisp-and-die "/tmp/(#| TMPL_VAR name |#)" :executable t :toplevel (lambda () ((#| TMPL_VAR name |#):start)) :compression 9)'
           ls -l /tmp
 
       - uses: actions/upload-artifact@v2
         with:
-          name: (#| TMPL_VAR name |#)-linux-static-x86_64
-          if-no-files-found: error
+          name: (#| TMPL_VAR name |#)-static
           path: |
             /tmp/(#| TMPL_VAR name |#)
+          if-no-files-found: error
 
-      - name: DEBUG SHELL install dependencies
-        run: apk add --no-cache --force-broken-world bash xz openssh-client-common
-        if: ${{ failure() }}
       - name: DEBUG SHELL
         uses: seemethere/action-tmate@skip_dependency_installation
         if: ${{ failure() }}
         with:
           install_dependencies: false
           sudo: false
-
