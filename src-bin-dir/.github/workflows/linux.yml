@@ -48,7 +48,7 @@ jobs:
       - name: Install SBCL 2.1.9
         run: |
           cd ~/Downloads/sbcl-2.1.9
-          sh make.sh --with-sb-core-compression
+          sh make.sh --fancy --with-sb-linkable-runtime
           unset SBCL_HOME
           INSTALL_ROOT=~/sbcl ./install.sh
         if: steps.cache.outputs.cache-hit != 'true'
