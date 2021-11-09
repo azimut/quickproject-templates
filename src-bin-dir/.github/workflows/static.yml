@@ -11,7 +11,7 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: APK build and actions/cache deps
-        run: apk add --no-cache ca-certificates curl openssl make gcc musl-dev linux-headers gnupg patch zlib-dev zlib-static git tar zstd tar zstd
+        run: apk add --no-cache ca-certificates curl openssl make gcc musl-dev linux-headers gnupg patch zlib-dev zlib-static git tar zstd tar
 
       - run: mkdir -pv ~/build
       - name: Get Current Month
@@ -93,7 +93,7 @@ jobs:
           /tmp/static-sbcl \
             --core /tmp/sb-tester.core \
             --non-interactive \
-            --eval '(sb-ext:save-lisp-and-die "/tmp/sbcl-(#| TMPL_VAR name |#)" :executable t :toplevel (lambda () ((#| TMPL_VAR name |#):start)) :compression t)'
+            --eval '(sb-ext:save-lisp-and-die "/tmp/(#| TMPL_VAR name |#)" :executable t :toplevel (lambda () ((#| TMPL_VAR name |#):start)) :compression t)'
           ls -l /tmp
 
       - uses: actions/upload-artifact@v2
@@ -101,9 +101,9 @@ jobs:
           name: (#| TMPL_VAR name |#)-linux-static-x86_64
           if-no-files-found: error
           path: |
-            /tmp/sbcl-(#| TMPL_VAR name |#)
+            /tmp/(#| TMPL_VAR name |#)
 
-      - name: Alpine DEBUG SHELL deps
+      - name: DEBUG SHELL install dependencies
         run: apk add --no-cache --force-broken-world bash xz openssh-client-common
         if: ${{ failure() }}
       - name: DEBUG SHELL
