@@ -15,7 +15,6 @@ deploy:
              --eval '(load "~/quicklisp/setup.lisp")' \
              --eval '(ql:quickload :deploy)' \
              --eval '(ql:quickload :(#| TMPL_VAR name |#)/deploy)' \
-             --eval '(deploy:define-library CL-OPENGL-BINDINGS::OPENGL :dont-deploy t)' \
              --eval '(asdf:make :(#| TMPL_VAR name |#)/deploy :verbose t :force t)'
 
 standalone:
