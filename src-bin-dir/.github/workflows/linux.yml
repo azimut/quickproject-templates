@@ -1,4 +1,4 @@
-name: Build (#| TMPL_VAR name |#)
+name: Linux Build (#| TMPL_VAR name |#)
 
 on: [push]
 
@@ -8,10 +8,12 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Setup
+      - name: apt-get
         run: |
           sudo apt-get update
           sudo apt-get install -y sbcl wget
+      - name: Setup
+        run: |
           mkdir -pv ~/Downloads
           mkdir -pv ~/sbcl
           mkdir -pv ~/quicklisp
@@ -69,12 +71,18 @@ jobs:
         run: |
           export PATH="$HOME/sbcl/bin:${PATH}"
           cd bin/
-          make (#| TMPL_VAR name |#)
+          make deploy     SBCL="$HOME/sbcl/bin/sbcl"
+          make standalone SBCL="$HOME/sbcl/bin/sbcl" SBCL_HOME="$HOME/sbcl/lib/sbcl"
 
       - uses: actions/upload-artifact@v2
         with:
           name: (#| TMPL_VAR name |#)-linux-x86_64
           path: bin/
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v2
+        with:
+          name: (#| TMPL_VAR name |#)-linux-x86_64-standalone
+          path: (#| TMPL_VAR name |#)
           if-no-files-found: error
 
       - name: DEBUG SHELL
