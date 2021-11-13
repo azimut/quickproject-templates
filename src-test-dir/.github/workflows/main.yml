@@ -1,6 +1,10 @@
 name: Build (#| TMPL_VAR name |#)
 
-on: [push]
+on:
+  push:
+    paths-ignore:
+      - 'LICENSE'
+      - 'README.org'
 
 jobs:
   build:

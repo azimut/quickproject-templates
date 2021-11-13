@@ -1,6 +1,10 @@
 name: Linux Build (#| TMPL_VAR name |#)
 
-on: [push]
+on:
+  push:
+    paths-ignore:
+      - 'LICENSE'
+      - 'README.md'
 
 jobs:
   build:
@@ -22,7 +26,7 @@ jobs:
 
       - name: Get Current Month
         id: current-month
-        run: echo "::set-output name=value::$(date -u "+%Y-%m")"
+        run: echo "::set-output name=value::$(date -u '+%Y-%m')"
       - name: Cache SBCL Setup
         id: cache
         uses: actions/cache@v2

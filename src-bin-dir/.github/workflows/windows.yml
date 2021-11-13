@@ -1,6 +1,10 @@
 name: Windows Build (#| TMPL_VAR name |#)
 
-on: [push]
+on:
+  push:
+    paths-ignore:
+      - 'LICENSE'
+      - 'README.md'
 
 jobs:
   build:
