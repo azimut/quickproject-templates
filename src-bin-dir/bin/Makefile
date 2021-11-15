@@ -20,8 +20,8 @@ deploy:
 standalone:
 	$(SBCL) --non-interactive --no-sysinit --no-userinit \
              --eval '(load "~/quicklisp/setup.lisp")' \
-             --eval '(ql:quickload :(#| TMPL_VAR name |#)/static)' \
-             --eval '(asdf:make :(#| TMPL_VAR name |#)/static :verbose t :force t)'
+             --eval '(ql:quickload :(#| TMPL_VAR name |#)/standalone)' \
+             --eval '(asdf:make :(#| TMPL_VAR name |#)/standalone :verbose t :force t)'
 
 static:
 	$(SBCL) --non-interactive --no-sysinit --no-userinit \
