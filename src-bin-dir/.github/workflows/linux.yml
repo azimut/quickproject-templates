@@ -1,11 +1,9 @@
 name: Linux Build (#| TMPL_VAR name |#)
-
 on:
   push:
     paths-ignore:
       - 'LICENSE'
       - 'README.md'
-
 jobs:
   build:
     runs-on: ubuntu-18.04
@@ -75,18 +73,24 @@ jobs:
         run: |
           export PATH="$HOME/sbcl/bin:${PATH}"
           cd bin/
+          make simple     SBCL="$HOME/sbcl/bin/sbcl"
           make deploy     SBCL="$HOME/sbcl/bin/sbcl"
           make standalone SBCL="$HOME/sbcl/bin/sbcl" SBCL_HOME="$HOME/sbcl/lib/sbcl"
 
       - uses: actions/upload-artifact@v2
         with:
           name: (#| TMPL_VAR name |#)-linux-x86_64
-          path: bin/
+          path: bin/(#| TMPL_VAR name |#)
           if-no-files-found: error
       - uses: actions/upload-artifact@v2
         with:
           name: (#| TMPL_VAR name |#)-linux-x86_64-standalone
-          path: (#| TMPL_VAR name |#)
+          path: bin/(#| TMPL_VAR name |#)-standalone
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v2
+        with:
+          name: (#| TMPL_VAR name |#)-linux-x86_64-deploy
+          path: bin/(#| TMPL_VAR name |#)-deploy
           if-no-files-found: error
 
       - name: DEBUG SHELL

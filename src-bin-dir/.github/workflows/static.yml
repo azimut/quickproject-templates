@@ -1,11 +1,9 @@
 name: Build Linux Static (#| TMPL_VAR name |#)
-
 on:
   push:
     paths-ignore:
       - 'LICENSE'
       - 'README.md'
-
 jobs:
   container:
     runs-on: ubuntu-latest
@@ -50,7 +48,7 @@ jobs:
 
       - uses: actions/upload-artifact@v2
         with:
-          name: (#| TMPL_VAR name |#)-static
+          name: (#| TMPL_VAR name |#)-linux-x86_64-static
           path: |
             /tmp/(#| TMPL_VAR name |#)
           if-no-files-found: error

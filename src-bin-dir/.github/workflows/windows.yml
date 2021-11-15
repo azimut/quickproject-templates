@@ -1,11 +1,9 @@
 name: Windows Build (#| TMPL_VAR name |#)
-
 on:
   push:
     paths-ignore:
       - 'LICENSE'
       - 'README.md'
-
 jobs:
   build:
     #if: ${{ false }}  # disable for now
@@ -108,21 +106,24 @@ jobs:
         run: |
           export PATH="$HOME/sbcl/bin:${PATH}"
           cd bin/
+          make simple     SBCL="$HOME/sbcl/bin/sbcl"
           make deploy     SBCL="$HOME/sbcl/bin/sbcl"
           make standalone SBCL="$HOME/sbcl/bin/sbcl" SBCL_HOME="$HOME/sbcl/lib/sbcl"
-        shell: bash
 
       - uses: actions/upload-artifact@v2
         with:
-          name: (#| TMPL_VAR name |#)-x64-windows
-          path: |
-            bin
+          name: (#| TMPL_VAR name |#)-windows-x86_64
+          path: bin/(#| TMPL_VAR name |#)
           if-no-files-found: error
       - uses: actions/upload-artifact@v2
         with:
-          name: (#| TMPL_VAR name |#)-x64-windows-standalone
-          path: |
-            (#| TMPL_VAR name |#)
+          name: (#| TMPL_VAR name |#)-windows-x86_64-standalone
+          path: bin/(#| TMPL_VAR name |#)-standalone
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v2
+        with:
+          name: (#| TMPL_VAR name |#)-windows-x86_64-deploy
+          path: bin/(#| TMPL_VAR name |#)-deploy
           if-no-files-found: error
 
       - name: DEBUG SHELL
