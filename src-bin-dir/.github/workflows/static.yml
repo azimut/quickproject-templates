@@ -42,46 +42,10 @@ jobs:
                --eval '(ql:update-all-dists)'
         if: steps.cache.outputs.cache-hit != 'true'
 
-      - name: STEP 1 - Dump .core and .sexp
+      - name: make static
         run: |
           source /etc/profile
-          sbcl --non-interactive \
-            --load ~/quicklisp/setup.lisp \
-            --eval "(pushnew \"$PWD/../\" ql:*local-project-directories*)" \
-            --eval '(ql:quickload :(#| TMPL_VAR name |#))' \
-            --load /usr/lib/sbcl/tools-for-build/dump-linkage-info.lisp \
-            --eval '(sb-dump-linkage-info:dump-to-file "/tmp/linkage-info.sexp")' \
-            --eval '(sb-ext:save-lisp-and-die "/tmp/sb-gmp-tester.core")'
-          ls -l /tmp
-
-      - name: STEP 2 - Compile .o and static-sbcl
-        run: |
-          source /etc/profile
-          sbcl --script /usr/lib/sbcl/tools-for-build/create-linkage-table-prelink-info-override.lisp \
-              /tmp/linkage-info.sexp \
-              /tmp/linkage-table-prelink-info-override.c
-          ls -l /tmp
-          while read l; do \
-            echo "$l"; eval "export ${l%%=*}=\"${l#*=}\""; \
-          done < /usr/lib/sbcl/sbcl.mk
-          env | sort
-          set -x
-          $CC $CFLAGS -Wno-builtin-declaration-mismatch \
-              -o /tmp/linkage-table-prelink-info-override.o \
-              -c /tmp/linkage-table-prelink-info-override.c
-          $CC -no-pie -static $LINKFLAGS \
-              -o /tmp/static-sbcl \
-              /usr/lib/sbcl/$LIBSBCL \
-              /tmp/linkage-table-prelink-info-override.o \
-              $LIBS -lc
-          ls -l /tmp
-
-      - name: STEP 3 - Run static-sbcl, with .core, and dump final binary
-        run: |
-          /tmp/static-sbcl \
-            --core /tmp/sb-gmp-tester.core \
-            --non-interactive \
-            --eval '(sb-ext:save-lisp-and-die "/tmp/(#| TMPL_VAR name |#)" :executable t :toplevel (lambda () ((#| TMPL_VAR name |#):start)) :compression 9)'
+          make static
           ls -l /tmp
 
       - uses: actions/upload-artifact@v2
