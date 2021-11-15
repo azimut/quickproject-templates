@@ -7,19 +7,23 @@ export SBCL_HOME
 
 simple:
 	$(SBCL) --non-interactive --no-sysinit --no-userinit \
-             --eval '(load "~/quicklisp/setup.lisp")' \
+             --load ~/quicklisp/setup.lisp \
+             --load '../(#| TMPL_VAR name |#).asd' \
              --eval '(ql:quickload :(#| TMPL_VAR name |#))' \
              --eval "(sb-ext:save-lisp-and-die \"(#| TMPL_VAR name |#)\" :toplevel #'(#| TMPL_VAR name |#):start :executable t :compression $(SBCL_COMPRESSION) :purify t)"
 
 deploy:
 	$(SBCL) --non-interactive --no-sysinit --no-userinit \
-             --eval '(load "~/quicklisp/setup.lisp")' \
+             --load ~/quicklisp/setup.lisp \
+             --load '../(#| TMPL_VAR name |#).asd' \
              --eval '(ql:quickload :(#| TMPL_VAR name |#)/deploy)' \
              --eval '(asdf:make :(#| TMPL_VAR name |#)/deploy :verbose t :force t)'
+	echo 'chmod +x (#| TMPL_VAR name |#); LD_PRELOAD="`echo ./*.so*`" ./(#| TMPL_VAR name |#)' > (#| TMPL_VAR name |#)-deploy/run.sh
 
 standalone:
 	$(SBCL) --non-interactive --no-sysinit --no-userinit \
-             --eval '(load "~/quicklisp/setup.lisp")' \
+             --load ~/quicklisp/setup.lisp \
+             --load '../(#| TMPL_VAR name |#).asd' \
              --eval '(ql:quickload :(#| TMPL_VAR name |#)/standalone)' \
              --eval '(asdf:make :(#| TMPL_VAR name |#)/standalone :verbose t :force t)'
 
