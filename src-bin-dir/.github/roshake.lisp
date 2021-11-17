@@ -40,7 +40,7 @@ The default value contains the minimal blacklist.")
   ;; (when roswell:*main*
   ;;   (pushnew (package-name (symbol-package roswell:*main*))
   ;;            *package-blacklist* :test #'string=))
-  (pushnew (package-name (symbol-package 'szoo8:start))
+  (pushnew (package-name (symbol-package '(#| TMPL_VAR name |#):start))
            *package-blacklist*
            :test #'string=)
   (pushnew (package-name (symbol-package 'cl-user))
