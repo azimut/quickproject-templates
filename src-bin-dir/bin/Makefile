@@ -3,7 +3,7 @@ SBCL_HOME ?= /usr/lib/sbcl
 SBCL_COMPRESSION ?= nil
 export SBCL_HOME
 
-.PHONY: strip clean run simple deploy standalone static
+.PHONY: strip clean tar simple deploy standalone static
 
 simple:
 	$(SBCL) --non-interactive --no-sysinit --no-userinit \
@@ -62,6 +62,3 @@ clean:
 	rm -v -f ../(#| TMPL_VAR name |#).zip
 	rm -v -f ./*.so*
 	rm -v -f ./(#| TMPL_VAR name |#)
-
-run:
-	LD_PRELOAD="$(shell echo ./*.so*)" ./(#| TMPL_VAR name |#)

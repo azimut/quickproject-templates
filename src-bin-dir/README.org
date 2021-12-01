@@ -1,8 +1,8 @@
-# (#| TMPL_VAR name |#)
+* (#| TMPL_VAR name |#)
 
 This is a project to do ... something.
 
-## License
+** License
 
 (#| TMPL_VAR license |#)
 (#| TMPL_IF copyright |#)
