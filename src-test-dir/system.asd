@@ -13,5 +13,6 @@
 (asdf:defsystem #:(#| TMPL_VAR name |#)/test
   :depends-on (#:(#| TMPL_VAR name |#) #:parachute)
   :pathname "t"
-  :components ((:file "package"))
+  :components ((:file "package")
+               (:file "tests"))
   :perform (asdf:test-op (op c) (uiop:symbol-call :parachute :test :(#| TMPL_VAR name |#)-test)))

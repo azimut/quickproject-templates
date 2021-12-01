@@ -1,12 +1,2 @@
-(defpackage #:(#| TMPL_VAR name |#)-test
-  (:use #:cl #:parachute))
-
-(in-package #:(#| TMPL_VAR name |#)-test)
-
-(define-test numbers
-  (of-type integer 5)
-  (true (numberp 2/3))
-  (false (numberp :keyword))
-  (is-values (values 0 "1")
-    (= 0)
-    (equal "1")))
+(uiop:define-package #:(#| TMPL_VAR name |#)-test
+  (:use #:cl #:(#| TMPL_VAR name |#) #:parachute))
