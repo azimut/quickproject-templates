@@ -14,6 +14,8 @@ jobs:
       - uses: 40ants/setup-lisp@v1
         with:
           asdf-system: (#| TMPL_VAR name |#)
-      - uses: 40ants/run-tests@v2
-        with:
-          asdf-system: (#| TMPL_VAR name |#)
+      - name: run tests
+        run: |
+          ros -e "(ql:quickload :(#| TMPL_VAR name |#)/test)" \
+              -e "(ql:quickload :parachute)" \
+              -e "(when (eq :FAILED (parachute:status (parachute:test '(#| TMPL_VAR name |#)-test))) (error 'testfailed))"
