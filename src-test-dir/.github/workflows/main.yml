@@ -24,8 +24,12 @@ jobs:
             ~/.cache/common-lisp/
           key: "${{ env.cache-name }}-${{ github.sha }}"
           restore-keys: "${{ env.cache-name }}"
+      - uses: andstor/file-existence-action@v1
+        id: check_files
+        with:
+          files: "/github/home/quicklisp/setup.lisp"
       - run: /usr/local/bin/install-quicklisp
-        if: hashFiles('~/quicklisp/setup.lisp') != ''
+        if: steps.check_files.outputs.files_exists != 'true'
 
       - name: Run tests
         run: |
