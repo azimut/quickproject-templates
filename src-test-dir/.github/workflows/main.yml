@@ -5,17 +5,32 @@ on:
     paths-ignore:
       - 'LICENSE'
       - 'README.org'
-
 jobs:
   build:
     runs-on: ubuntu-latest
+    container:
+      image: clfoundation/sbcl:2.1.11
     steps:
       - uses: actions/checkout@v2
-      - uses: 40ants/setup-lisp@v1
         with:
-          asdf-system: (#| TMPL_VAR name |#)
-      - name: run tests
+          fetch-depth: 2
+      - uses: actions/cache@v2
+        id: cache
+        env:
+          cache-name: cache-alpine
+        with:
+          path: |
+            ~/quicklisp/
+            ~/.cache/common-lisp/
+          key: "${{ env.cache-name }}-${{ github.sha }}"
+          restore-keys: "${{ env.cache-name }}"
+      - run: /usr/local/bin/install-quicklisp
+        if: hashFiles('~/quicklisp/setup.lisp') != ''
+
+      - name: Run tests
         run: |
-          ros -e "(ql:quickload :(#| TMPL_VAR name |#)/test)" \
-              -e "(ql:quickload :parachute)" \
-              -e "(when (eq :FAILED (parachute:status (parachute:test '(#| TMPL_VAR name |#)-test))) (error 'testfailed))"
+          sbcl --non-interactive \
+               --load ~/quicklisp/setup.lisp \
+               --load (#| TMPL_VAR name |#).asd \
+               --eval "(ql:quickload :(#| TMPL_VAR name |#)/test)" \
+               --eval "(parachute:test-toplevel '(#| TMPL_VAR name |#)-test)"
