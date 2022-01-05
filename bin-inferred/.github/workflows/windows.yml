@@ -1,0 +1,131 @@
+name: Windows Build (#| TMPL_VAR name |#)
+on:
+  push:
+    paths-ignore:
+      - 'LICENSE'
+      - 'README.org'
+jobs:
+  build:
+    #if: ${{ false }}  # disable for now
+    runs-on: windows-2016
+    env:
+      VCPKG_CONCURRENCY: 1
+      VCPKG_DEFAULT_TRIPLET: x64-windows
+      VCPKG_MAX_CONCURRENCY: 1
+      VCPKG_FEATURE_FLAGS: fastbuild,versions
+    steps:
+      - uses: actions/checkout@v2
+      - name: mkdir
+        run: |
+          mkdir -p ~/Downloads
+          mkdir -p ~/quicklisp
+          mkdir -p ~/.cache/common-lisp
+          mkdir -p ~/sbcl
+          mkdir -p ~/AppData/Local/cache/common-lisp
+        shell: bash
+
+      - name: Get Current Month
+        id: current-month
+        run: echo "::set-output name=value::$(date -u '+%Y-%m')"
+      - name: Cache SBCL Setup
+        id: cache
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-sbcl-2.1.9
+        with:
+          path: |
+            ~/Downloads/
+            ~/quicklisp
+            ~/.cache/common-lisp/
+            ~/sbcl
+            ~/AppData/Local/cache/common-lisp
+          key: "${{ steps.current-month.outputs.value }}-${{ env.cache-name }}-${{ runner.os }}"
+      - name: Restore Path To Cached Files
+        run: |
+          echo $HOME/sbcl/bin >> $GITHUB_PATH
+        if: steps.cache.outputs.cache-hit == 'true'
+
+      - run: choco install lessmsi make 7zip wget
+      - name: Write vcpkg.json
+        uses: DamianReeves/write-file-action
+        with:
+          path: vcpkg.json
+          contents: |
+            {
+                "name": "example",
+                "version-string": "0.0.1",
+                "builtin-baseline": "843e0ba0d8f9c9c572e45564263eedfc7745e74f",
+                "dependencies": [
+                    "zlib",
+                ]
+            }
+      - uses: lukka/run-vcpkg@v10
+        with:
+          runVcpkgFormatString: '[`install`, `--recurse`, `--x-install-root`, `$[env.VCPKG_INSTALLED_DIR]`, `--triplet`, `$[env.VCPKG_DEFAULT_TRIPLET]`]'
+          vcpkgGitCommitId: 843e0ba0d8f9c9c572e45564263eedfc7745e74f
+          runVcpkgInstall: true
+      - run: cp -v vcpkg/packages/*/bin/*.dll C:/windows/system32/
+
+      - name: Install Bootstraping SBCL 1.4.14
+        run: |
+          cd ~/Downloads
+          wget http://prdownloads.sourceforge.net/sbcl/sbcl-1.4.14-x86-64-windows-binary.msi
+          lessmsi x sbcl-1.4.14-x86-64-windows-binary.msi
+          mv "sbcl-1.4.14-x86-64-windows-binary/SourceDir/PFiles/Steel Bank Common Lisp/1.4.14" sbcl_bin
+        if: steps.cache.outputs.cache-hit != 'true'
+
+      - name: Install SBCL 2.1.9
+        run: |
+          cd ~/Downloads
+          export SBCL_HOME="$PWD/sbcl_bin";
+          export PATH="$PWD/sbcl_bin:${PATH}";
+          wget http://downloads.sourceforge.net/project/sbcl/sbcl/2.1.9/sbcl-2.1.9-source.tar.bz2
+          tar xjf sbcl-2.1.9-source.tar.bz2
+          cd sbcl-2.1.9
+          sh make.sh --fancy --with-sb-linkable-runtime
+          unset SBCL_HOME
+          INSTALL_ROOT=~/sbcl ./install.sh
+        shell: bash
+        if: steps.cache.outputs.cache-hit != 'true'
+
+      - name: Install quicklisp
+        run: |
+          export SBCL_HOME="$HOME/sbcl/lib/sbcl"
+          export PATH="$HOME/sbcl/bin:${PATH}"
+          cd ~/Downloads
+          wget https://beta.quicklisp.org/quicklisp.lisp
+          sbcl --non-interactive \
+               --eval '(load "quicklisp.lisp")' \
+               --eval '(quicklisp-quickstart:install)' \
+               --eval '(ql-util:without-prompting (ql:add-to-init-file))' \
+               --eval '(ql:update-all-dists)'
+        shell: bash
+        if: steps.cache.outputs.cache-hit != 'true'
+
+      - name: Build Binary
+        run: |
+          export PATH="$HOME/sbcl/bin:${PATH}"
+          cd bin/
+          make simple     SBCL="$HOME/sbcl/bin/sbcl"
+          make deploy     SBCL="$HOME/sbcl/bin/sbcl"
+          make standalone SBCL="$HOME/sbcl/bin/sbcl" SBCL_HOME="$HOME/sbcl/lib/sbcl"
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: (#| TMPL_VAR name |#)-windows-x86_64
+          path: bin/(#| TMPL_VAR name |#)
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v2
+        with:
+          name: (#| TMPL_VAR name |#)-windows-x86_64-standalone
+          path: bin/(#| TMPL_VAR name |#)-standalone
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v2
+        with:
+          name: (#| TMPL_VAR name |#)-windows-x86_64-deploy
+          path: bin/(#| TMPL_VAR name |#)-deploy
+          if-no-files-found: error
+
+      - name: DEBUG SHELL
+        uses: mxschmitt/action-tmate@v3
+        if: ${{ failure() }}

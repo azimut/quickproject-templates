@@ -1,0 +1,61 @@
+name: Build Linux Static (#| TMPL_VAR name |#)
+on:
+  push:
+    paths-ignore:
+      - 'LICENSE'
+      - 'README.org'
+jobs:
+  container:
+    runs-on: ubuntu-latest
+    container:
+      image: molochwalker/gantoo:musl
+    steps:
+      - uses: actions/checkout@v2
+
+      - run: mkdir -pv ~/build
+      - name: Get Current Month
+        id: current-month
+        run: echo "::set-output name=value::$(date -u '+%Y-%m')"
+      - name: Cache SBCL 2.1.9 Setup
+        id: cache
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-sbcl-2.1.9-musl-(#| TMPL_VAR name |#)
+        with:
+          path: |
+            ~/build
+            ~/quicklisp
+            ~/.cache/common-lisp
+          key: "${{ steps.current-month.outputs.value }}-${{ env.cache-name }}-${{ runner.os }}"
+
+      - name: First time Install quicklisp
+        run: |
+          cd ~/build
+          wget https://beta.quicklisp.org/quicklisp.lisp
+          source /etc/profile
+          sbcl --non-interactive \
+               --eval '(load "quicklisp.lisp")' \
+               --eval '(quicklisp-quickstart:install)' \
+               --eval '(ql-util:without-prompting (ql:add-to-init-file))' \
+               --eval '(ql:update-all-dists)'
+        if: steps.cache.outputs.cache-hit != 'true'
+
+      - name: make static
+        run: |
+          source /etc/profile
+          make static
+          ls -l /tmp
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: (#| TMPL_VAR name |#)-linux-x86_64-static
+          path: |
+            /tmp/(#| TMPL_VAR name |#)
+          if-no-files-found: error
+
+      - name: DEBUG SHELL
+        uses: seemethere/action-tmate@skip_dependency_installation
+        if: ${{ failure() }}
+        with:
+          install_dependencies: false
+          sudo: false
