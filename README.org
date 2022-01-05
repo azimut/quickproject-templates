@@ -9,9 +9,10 @@
         quickproject:*include-copyright* t)
   #+end_src
 
-  | src-dir/      | .lisp under src/                   |
-  | src-test-dir/ | .lisp under src/, and t/ parachute |
-  | src-bin-dir/  | binary build with deploy           |
+  | src-dir/      | .lisp under src/                                               |
+  | src-test-dir/ | .lisp under src/, and t/ parachute                             |
+  | src-bin-dir/  | binary build                                                   |
+  | bin-inferred/ | binary build, lisp on root, asdf with :package-inferred-system |
 
 ** See Also
 
