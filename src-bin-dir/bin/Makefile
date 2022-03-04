@@ -1,4 +1,4 @@
-SBCL ?= /usr/bin/sbcl
+SBCL_BIN ?= /usr/bin/sbcl
 SBCL_HOME ?= /usr/lib/sbcl
 SBCL_COMPRESSION ?= nil
 export SBCL_HOME
@@ -6,14 +6,14 @@ export SBCL_HOME
 .PHONY: strip clean tar simple deploy standalone static
 
 simple:
-	$(SBCL) --non-interactive --no-sysinit --no-userinit \
+	$(SBCL_BIN) --non-interactive --no-sysinit --no-userinit \
              --load ~/quicklisp/setup.lisp \
              --load '../(#| TMPL_VAR name |#).asd' \
              --eval '(ql:quickload :(#| TMPL_VAR name |#))' \
              --eval "(sb-ext:save-lisp-and-die \"(#| TMPL_VAR name |#)\" :toplevel #'(#| TMPL_VAR name |#):start :executable t :compression $(SBCL_COMPRESSION) :purify t)"
 
 deploy:
-	$(SBCL) --non-interactive --no-sysinit --no-userinit \
+	$(SBCL_BIN) --non-interactive --no-sysinit --no-userinit \
              --load ~/quicklisp/setup.lisp \
              --load '../(#| TMPL_VAR name |#).asd' \
              --eval '(ql:quickload :(#| TMPL_VAR name |#)/deploy)' \
@@ -21,21 +21,21 @@ deploy:
 	echo 'chmod +x (#| TMPL_VAR name |#); LD_PRELOAD="`echo ./*.so*`" ./(#| TMPL_VAR name |#)' > (#| TMPL_VAR name |#)-deploy/run.sh
 
 standalone:
-	$(SBCL) --non-interactive --no-sysinit --no-userinit \
+	$(SBCL_BIN) --non-interactive --no-sysinit --no-userinit \
              --load ~/quicklisp/setup.lisp \
              --load '../(#| TMPL_VAR name |#).asd' \
              --eval '(ql:quickload :(#| TMPL_VAR name |#)/standalone)' \
              --eval '(asdf:make :(#| TMPL_VAR name |#)/standalone :verbose t :force t)'
 
 static:
-	$(SBCL) --non-interactive --no-sysinit --no-userinit \
+	$(SBCL_BIN) --non-interactive --no-sysinit --no-userinit \
 	     --load ~/quicklisp/setup.lisp \
 	     --eval "(pushnew \"$PWD/../\" ql:*local-project-directories*)" \
 	     --eval '(ql:quickload :(#| TMPL_VAR name |#))' \
 	     --load $(SBCL_HOME)/tools-for-build/dump-linkage-info.lisp \
 	     --eval '(sb-dump-linkage-info:dump-to-file "/tmp/linkage-info.sexp")' \
 	     --eval '(sb-ext:save-lisp-and-die "/tmp/(#| TMPL_VAR name |#).core")'
-	$(SBCL) --script $(SBCL_HOME)/tools-for-build/create-linkage-table-prelink-info-override.lisp \
+	$(SBCL_BIN) --script $(SBCL_HOME)/tools-for-build/create-linkage-table-prelink-info-override.lisp \
 	     /tmp/linkage-info.sexp \
 	     /tmp/linkage-table-prelink-info-override.c
 	while read l; do echo "$l"; eval "export ${l%%=*}=\"${l#*=}\""; done < /usr/lib/sbcl/sbcl.mk

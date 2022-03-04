@@ -106,9 +106,9 @@ jobs:
         run: |
           export PATH="$HOME/sbcl/bin:${PATH}"
           cd bin/
-          make simple     SBCL="$HOME/sbcl/bin/sbcl"
-          make deploy     SBCL="$HOME/sbcl/bin/sbcl"
-          make standalone SBCL="$HOME/sbcl/bin/sbcl" SBCL_HOME="$HOME/sbcl/lib/sbcl"
+          make simple     SBCL_BIN="$HOME/sbcl/bin/sbcl"
+          make deploy     SBCL_BIN="$HOME/sbcl/bin/sbcl"
+          make standalone SBCL_BIN="$HOME/sbcl/bin/sbcl" SBCL_HOME="$HOME/sbcl/lib/sbcl"
 
       - uses: actions/upload-artifact@v2
         with:

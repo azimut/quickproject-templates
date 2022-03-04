@@ -17,7 +17,6 @@ jobs:
       - name: Setup
         run: |
           mkdir -pv ~/Downloads
-          mkdir -pv ~/sbcl
           mkdir -pv ~/quicklisp
           mkdir -pv ~/.cache/common-lisp
         shell: bash
@@ -35,32 +34,11 @@ jobs:
             ~/Downloads/
             ~/quicklisp
             ~/.cache/common-lisp/
-            ~/sbcl
           key: "${{ steps.current-month.outputs.value }}-${{ env.cache-name }}-${{ runner.os }}"
-      - name: Restore Path To Cached Files
-        run: |
-          echo $HOME/sbcl/bin >> $GITHUB_PATH
-        if: steps.cache.outputs.cache-hit == 'true'
-
-      - name: Download SBCL 2.1.9
-        run: |
-          cd ~/Downloads
-          wget http://downloads.sourceforge.net/project/sbcl/sbcl/2.1.9/sbcl-2.1.9-source.tar.bz2
-          tar xjf sbcl-2.1.9-source.tar.bz2
-        if: steps.cache.outputs.cache-hit != 'true'
-
-      - name: Install SBCL 2.1.9
-        run: |
-          cd ~/Downloads/sbcl-2.1.9
-          sh make.sh --fancy --with-sb-linkable-runtime
-          unset SBCL_HOME
-          INSTALL_ROOT=~/sbcl ./install.sh
-        if: steps.cache.outputs.cache-hit != 'true'
 
       - name: Install quicklisp
         run: |
           cd ~/Downloads
-          export PATH="$HOME/sbcl/bin:${PATH}"
           wget https://beta.quicklisp.org/quicklisp.lisp
           sbcl --non-interactive \
                --eval '(load "quicklisp.lisp")' \
@@ -71,26 +49,13 @@ jobs:
 
       - name: Build Binary
         run: |
-          export PATH="$HOME/sbcl/bin:${PATH}"
           cd bin/
-          make simple     SBCL_BIN="$HOME/sbcl/bin/sbcl"
-          make deploy     SBCL_BIN="$HOME/sbcl/bin/sbcl"
-          make standalone SBCL_BIN="$HOME/sbcl/bin/sbcl" SBCL_HOME="$HOME/sbcl/lib/sbcl"
+          make simple
 
       - uses: actions/upload-artifact@v2
         with:
           name: (#| TMPL_VAR name |#)-linux-x86_64
           path: bin/(#| TMPL_VAR name |#)
-          if-no-files-found: error
-      - uses: actions/upload-artifact@v2
-        with:
-          name: (#| TMPL_VAR name |#)-linux-x86_64-standalone
-          path: bin/(#| TMPL_VAR name |#)-standalone
-          if-no-files-found: error
-      - uses: actions/upload-artifact@v2
-        with:
-          name: (#| TMPL_VAR name |#)-linux-x86_64-deploy
-          path: bin/(#| TMPL_VAR name |#)-deploy
           if-no-files-found: error
 
       - name: DEBUG SHELL
