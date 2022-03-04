@@ -1,4 +1,4 @@
-(defpackage #:(#| TMPL_VAR name |#)
+(uiop:define-package #:(#| TMPL_VAR name |#)
   (:nicknames #:(#| TMPL_VAR name |#)/main)
   (:use #:cl)
   (:export #:start))
