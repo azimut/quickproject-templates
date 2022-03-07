@@ -15,6 +15,9 @@ jobs:
       VCPKG_FEATURE_FLAGS: fastbuild,versions
     steps:
       - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
       - name: mkdir
         run: |
           mkdir -p ~/Downloads
@@ -110,21 +113,31 @@ jobs:
           make deploy     SBCL_BIN="$HOME/sbcl/bin/sbcl"
           make standalone SBCL_BIN="$HOME/sbcl/bin/sbcl" SBCL_HOME="$HOME/sbcl/lib/sbcl"
 
-      - uses: actions/upload-artifact@v2
+      - name: Dev Release
+        uses: marvinpinto/action-automatic-releases@latest
+        if: "!startsWith(github.ref, 'refs/tags/')"
         with:
-          name: (#| TMPL_VAR name |#)-windows-x86_64
-          path: bin/(#| TMPL_VAR name |#)
-          if-no-files-found: error
-      - uses: actions/upload-artifact@v2
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          automatic_release_tag: "latest"
+          prerelease: true
+          title: "Development Build"
+          files: |
+            bin/(#| TMPL_VAR name |#)
+            bin/(#| TMPL_VAR name |#)-standalone
+            bin/(#| TMPL_VAR name |#)-deploy
+            LICENSE
+
+      - name: Stable Release
+        uses: marvinpinto/action-automatic-releases@latest
+        if: "startsWith(github.ref, 'refs/tags/')"
         with:
-          name: (#| TMPL_VAR name |#)-windows-x86_64-standalone
-          path: bin/(#| TMPL_VAR name |#)-standalone
-          if-no-files-found: error
-      - uses: actions/upload-artifact@v2
-        with:
-          name: (#| TMPL_VAR name |#)-windows-x86_64-deploy
-          path: bin/(#| TMPL_VAR name |#)-deploy
-          if-no-files-found: error
+          prerelease: false
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          files: |
+            bin/(#| TMPL_VAR name |#)
+            bin/(#| TMPL_VAR name |#)-standalone
+            bin/(#| TMPL_VAR name |#)-deploy
+            LICENSE
 
       - name: DEBUG SHELL
         uses: mxschmitt/action-tmate@v3

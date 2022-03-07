@@ -9,6 +9,8 @@ jobs:
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
 
       - name: apt-get
         run: |
@@ -52,11 +54,27 @@ jobs:
           cd bin/
           make simple
 
-      - uses: actions/upload-artifact@v2
+      - name: Dev Release
+        uses: marvinpinto/action-automatic-releases@latest
+        if: "!startsWith(github.ref, 'refs/tags/')"
         with:
-          name: (#| TMPL_VAR name |#)-linux-x86_64
-          path: bin/(#| TMPL_VAR name |#)
-          if-no-files-found: error
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          automatic_release_tag: "latest"
+          prerelease: true
+          title: "Development Build"
+          files: |
+            bin/(#| TMPL_VAR name |#)
+            LICENSE
+
+      - name: Stable Release
+        uses: marvinpinto/action-automatic-releases@latest
+        if: "startsWith(github.ref, 'refs/tags/')"
+        with:
+          prerelease: false
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          files: |
+            bin/(#| TMPL_VAR name |#)
+            LICENSE
 
       - name: DEBUG SHELL
         uses: mxschmitt/action-tmate@v3
