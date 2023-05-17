@@ -1,5 +1,6 @@
 (asdf:defsystem #:(#| TMPL_VAR name |#)
   :class :package-inferred-system
+  :pathname "src"
   :description "Describe (#| TMPL_VAR name |#) here"
   :author "(#| TMPL_VAR author |#)"
   :license  "(#| TMPL_VAR license |#)"
