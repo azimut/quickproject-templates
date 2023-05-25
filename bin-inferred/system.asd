@@ -12,11 +12,11 @@
   :defsystem-depends-on ("cffi-grovel")
   :build-operation :static-program-op
   :build-pathname "bin/(#| TMPL_VAR name |#)-standalone/(#| TMPL_VAR name |#)"
-  :entry-point "(#| TMPL_VAR name |#):start")
+  :entry-point "(#| TMPL_VAR name |#):main")
 
 (asdf:defsystem #:(#| TMPL_VAR name |#)/deploy
   :depends-on (#:(#| TMPL_VAR name |#))
   :defsystem-depends-on (:deploy)
   :build-operation "deploy-op"
   :build-pathname "(#| TMPL_VAR name |#)-deploy/(#| TMPL_VAR name |#)"
-  :entry-point "(#| TMPL_VAR name |#):start")
+  :entry-point "(#| TMPL_VAR name |#):main")

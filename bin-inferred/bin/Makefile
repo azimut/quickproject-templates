@@ -10,7 +10,7 @@ simple:
              --load ~/quicklisp/setup.lisp \
              --load '../(#| TMPL_VAR name |#).asd' \
              --eval '(ql:quickload :(#| TMPL_VAR name |#))' \
-             --eval "(sb-ext:save-lisp-and-die \"(#| TMPL_VAR name |#)\" :toplevel #'(#| TMPL_VAR name |#):start :executable t :compression $(SBCL_COMPRESSION) :purify t)"
+             --eval "(sb-ext:save-lisp-and-die \"(#| TMPL_VAR name |#)\" :toplevel #'(#| TMPL_VAR name |#):main :executable t :compression $(SBCL_COMPRESSION) :purify t)"
 
 deploy:
 	$(SBCL_BIN) --non-interactive --no-sysinit --no-userinit \
@@ -26,6 +26,16 @@ standalone:
              --load '../(#| TMPL_VAR name |#).asd' \
              --eval '(ql:quickload :(#| TMPL_VAR name |#)/standalone)' \
              --eval '(asdf:make :(#| TMPL_VAR name |#)/standalone :verbose t :force t)'
+
+$(HOME)/Downloads/appimagetool:
+	wget -c -O ~/Downloads/appimagetool 'https://github.com/AppImage/AppImageKit/releases/download/12/appimagetool-x86_64.AppImage'
+	chmod +x ~/Downloads/appimagetool
+
+(#| TMPL_VAR name |#).AppImage: $(HOME)/Downloads/appimagetool AppDir/(#| TMPL_VAR name |#) AppRun iconfile.svg default.desktop
+	install -D default.desktop AppDir/(#| TMPL_VAR name |#).desktop
+	install -D AppRun          AppDir/AppRun
+	install -D iconfile.svg    AppDir/iconfile.svg
+	ARCH=x86_64 ~/Downloads/appimagetool -v AppDir (#| TMPL_VAR name |#).AppImage
 
 static:
 	$(SBCL_BIN) --non-interactive --no-sysinit --no-userinit \
@@ -50,4 +60,4 @@ static:
 	    $LIBS
 	/tmp/static-sbcl --non-interactive \
 		--core '/tmp/(#| TMPL_VAR name |#).core' \
-		--eval '(sb-ext:save-lisp-and-die "/tmp/(#| TMPL_VAR name |#)" :executable t :toplevel (lambda () ((#| TMPL_VAR name |#):start)) :compression $(SBC_COMPRESSION) :purify t)'
+		--eval '(sb-ext:save-lisp-and-die "/tmp/(#| TMPL_VAR name |#)" :executable t :toplevel (lambda () ((#| TMPL_VAR name |#):main)) :compression $(SBC_COMPRESSION) :purify t)'
