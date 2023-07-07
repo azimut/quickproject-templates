@@ -122,8 +122,8 @@ jobs:
           title: "Development Build"
           files: |
             bin/(#| TMPL_VAR name |#)
-            bin/(#| TMPL_VAR name |#)-standalone
-            bin/(#| TMPL_VAR name |#)-deploy
+            bin/standalone
+            bin/deploy
             LICENSE
 
       - name: Stable Release
@@ -134,8 +134,8 @@ jobs:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
           files: |
             bin/(#| TMPL_VAR name |#)
-            bin/(#| TMPL_VAR name |#)-standalone
-            bin/(#| TMPL_VAR name |#)-deploy
+            bin/standalone
+            bin/deploy
             LICENSE
 
       - name: DEBUG SHELL

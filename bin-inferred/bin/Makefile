@@ -18,7 +18,7 @@ deploy:
              --load '../(#| TMPL_VAR name |#).asd' \
              --eval '(ql:quickload :(#| TMPL_VAR name |#)/deploy)' \
              --eval '(asdf:make :(#| TMPL_VAR name |#)/deploy :verbose t :force t)'
-	echo 'chmod +x (#| TMPL_VAR name |#); LD_PRELOAD="`echo ./*.so*`" ./(#| TMPL_VAR name |#)' > (#| TMPL_VAR name |#)-deploy/run.sh
+	echo 'chmod +x (#| TMPL_VAR name |#); LD_PRELOAD="`echo ./*.so*`" ./(#| TMPL_VAR name |#)' > deploy/run.sh
 
 standalone:
 	$(SBCL_BIN) --non-interactive --no-sysinit --no-userinit \
@@ -27,11 +27,11 @@ standalone:
              --eval '(ql:quickload :(#| TMPL_VAR name |#)/standalone)' \
              --eval '(asdf:make :(#| TMPL_VAR name |#)/standalone :verbose t :force t)'
 
-$(HOME)/Downloads/appimagetool:
-	wget -c -O ~/Downloads/appimagetool 'https://github.com/AppImage/AppImageKit/releases/download/12/appimagetool-x86_64.AppImage'
-	chmod +x ~/Downloads/appimagetool
+appimagetool:
+	wget -c -O appimagetool 'https://github.com/AppImage/AppImageKit/releases/download/12/appimagetool-x86_64.AppImage'
+	chmod +x appimagetool
 
-(#| TMPL_VAR name |#).AppImage: $(HOME)/Downloads/appimagetool AppDir/(#| TMPL_VAR name |#) AppRun iconfile.svg default.desktop
+(#| TMPL_VAR name |#).AppImage: appimagetool AppDir/(#| TMPL_VAR name |#) AppRun iconfile.svg default.desktop
 	install -D default.desktop AppDir/(#| TMPL_VAR name |#).desktop
 	install -D AppRun          AppDir/AppRun
 	install -D iconfile.svg    AppDir/iconfile.svg
