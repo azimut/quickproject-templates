@@ -17,6 +17,7 @@ deploy:
              --load ~/quicklisp/setup.lisp \
              --load '../(#| TMPL_VAR name |#).asd' \
              --eval '(ql:quickload :(#| TMPL_VAR name |#)/deploy)' \
+             --eval '(push :deploy-console *features*)' \
              --eval '(asdf:make :(#| TMPL_VAR name |#)/deploy :verbose t :force t)'
 	echo 'chmod +x (#| TMPL_VAR name |#); LD_PRELOAD="`echo ./*.so*`" ./(#| TMPL_VAR name |#)' > deploy/run.sh
 
