@@ -1,35 +1,51 @@
-name: Build (#| TMPL_VAR name |#)
+name: Build and test (#| TMPL_VAR name |#)
 
 on:
   push:
     paths-ignore:
       - 'LICENSE'
       - 'README.org'
+
 jobs:
   build:
     runs-on: ubuntu-latest
-    container:
-      image: clfoundation/sbcl:2.1.11
     steps:
+
       - uses: actions/checkout@v2
         with:
-          fetch-depth: 2
+          fetch-depth: 0
+
+      - name: APT deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y sbcl
+
+      - name: Get Current Month
+        id: current-month
+        run: echo "::set-output name=value::$(date -u '+%Y-%m')"
+      - name: mkdir cache dirs
+        run: mkdir -pv ~/Downloads ~/quicklisp ~/.cache/common-lisp
       - uses: actions/cache@v2
         id: cache
         env:
-          cache-name: cache-alpine
+          cache-name: cache-sbcl-ubuntu
         with:
           path: |
-            ~/quicklisp/
+            ~/Downloads/
+            ~/quicklisp
             ~/.cache/common-lisp/
-          key: "${{ env.cache-name }}-${{ github.sha }}"
-          restore-keys: "${{ env.cache-name }}"
-      - uses: andstor/file-existence-action@v1
-        id: check_files
-        with:
-          files: "/github/home/quicklisp/setup.lisp"
-      - run: /usr/local/bin/install-quicklisp
-        if: steps.check_files.outputs.files_exists != 'true'
+          key: "${{ steps.current-month.outputs.value }}-${{ env.cache-name }}"
+
+      - name: Install quicklisp
+        run: |
+          cd ~/Downloads
+          wget https://beta.quicklisp.org/quicklisp.lisp
+          sbcl --non-interactive \
+               --eval '(load "quicklisp.lisp")' \
+               --eval '(quicklisp-quickstart:install)' \
+               --eval '(ql-util:without-prompting (ql:add-to-init-file))' \
+               --eval '(ql:update-all-dists)'
+        if: steps.cache.outputs.cache-hit != 'true'
 
       - name: Run tests
         run: |
