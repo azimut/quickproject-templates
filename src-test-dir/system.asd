@@ -3,8 +3,8 @@
   :author "(#| TMPL_VAR author |#)"
   :license  "(#| TMPL_VAR license |#)"
   :version "0.0.1"
-  :serial t(#| TMPL_IF depends-on |#)
-  :depends-on (#| TMPL_VAR dependencies-string |#)(#| /TMPL_IF |#)
+  :serial t
+  :depends-on (#:defpackage-plus)
   :pathname "src"
   :components ((:file "package")
                (:file "(#| TMPL_VAR name |#)"))
