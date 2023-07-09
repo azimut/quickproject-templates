@@ -3,7 +3,7 @@ on:
   push:
     paths-ignore:
       - 'LICENSE'
-      - 'README.org'
+      - 'README.md'
 jobs:
   container:
     runs-on: ubuntu-latest

@@ -3,7 +3,7 @@ on:
   push:
     paths-ignore:
       - 'LICENSE'
-      - 'README.org'
+      - 'README.md'
 jobs:
   build:
     #if: ${{ false }}  # disable for now

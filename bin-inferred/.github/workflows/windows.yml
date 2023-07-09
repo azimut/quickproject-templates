@@ -3,7 +3,7 @@ on:
   push:
     paths-ignore:
       - 'LICENSE'
-      - 'README.org'
+      - 'README.md'
       - '.github/workflows/linux.yml'
       - '.github/workflows/static.yml'
 jobs:
