@@ -25,11 +25,12 @@
 
 bin/*
 !bin/Makefile
-(#| TMPL_VAR name |#).zip
+!bin/iconfile.svg
+!bin/default.desktop
+!bin/AppRun
 
 # Emacs
 
 *~
 \#*\#
 .\#*
-

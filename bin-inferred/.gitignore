@@ -28,11 +28,9 @@ bin/*
 !bin/iconfile.svg
 !bin/default.desktop
 !bin/AppRun
-(#| TMPL_VAR name |#).zip
 
 # Emacs
 
 *~
 \#*\#
 .\#*
-
