@@ -12,41 +12,11 @@ jobs:
     steps:
 
       - uses: actions/checkout@v2
+
+      - uses: 40ants/setup-lisp@v2
         with:
-          fetch-depth: 0
+          asdf-system: (#| TMPL_VAR name |#)
 
-      - name: APT deps
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y sbcl
-
-      - name: Get Current Month
-        id: current-month
-        run: echo "::set-output name=value::$(date -u '+%Y-%m')"
-      - name: mkdir cache dirs
-        run: mkdir -pv ~/Downloads ~/quicklisp ~/.cache/common-lisp
-      - uses: actions/cache@v2
-        id: cache
-        env:
-          cache-name: cache-sbcl-ubuntu
+      - uses: 40ants/run-tests@v2
         with:
-          path: |
-            ~/Downloads/
-            ~/quicklisp
-            ~/.cache/common-lisp/
-          key: "${{ steps.current-month.outputs.value }}-${{ env.cache-name }}"
-
-      - name: Install quicklisp
-        run: |
-          cd ~/Downloads
-          wget https://beta.quicklisp.org/quicklisp.lisp
-          sbcl --non-interactive \
-               --eval '(load "quicklisp.lisp")' \
-               --eval '(quicklisp-quickstart:install)' \
-               --eval '(ql-util:without-prompting (ql:add-to-init-file))' \
-               --eval '(ql:update-all-dists)'
-        if: steps.cache.outputs.cache-hit != 'true'
-
-      - name: Run tests
-        run: |
-          make test
+          asdf-system: (#| TMPL_VAR name |#)

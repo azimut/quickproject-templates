@@ -7,10 +7,14 @@ on:
       - 'README.md'
 
 jobs:
+
   build:
+
     runs-on: ubuntu-latest
     steps:
+
       - uses: actions/checkout@v2
+
       - uses: 40ants/setup-lisp@v2
         with:
           asdf-system: (#| TMPL_VAR name |#)
