@@ -1,13 +1,5 @@
 SRCS = $(wildcard src/*.lisp)
 
-.PHONY: test
-test:
-	@sbcl --non-interactive --no-sysinit --no-userinit \
-	--load ~/quicklisp/setup.lisp \
-	--load '(#| TMPL_VAR name |#).asd' \
-	--eval "(ql:quickload :(#| TMPL_VAR name |#)/test)" \
-	--eval "(parachute:test-toplevel '(#| TMPL_VAR name |#)-test)"
-
 docs/index.html: $(SRCS)
 	@sbcl --non-interactive --no-sysinit --no-userinit \
 	--load ~/quicklisp/setup.lisp \
