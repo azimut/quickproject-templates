@@ -6,7 +6,7 @@ all: docs/index.html deps.svg
 .PHONY: doc
 doc: docs/index.html
 
-docs/index.html: $(SRCS) deps.svg
+docs/index.html: $(SRCS) deps.svg README.md
 	@sbcl --non-interactive --no-sysinit --no-userinit \
 	--load ~/quicklisp/setup.lisp \
 	--load '(#| TMPL_VAR name |#).asd' \

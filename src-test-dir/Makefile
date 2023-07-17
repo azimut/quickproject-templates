@@ -15,7 +15,7 @@ test: $(SRCS) $(TESTS)
 .PHONY: doc
 doc: docs/index.html
 
-docs/index.html: $(SRCS)
+docs/index.html: $(SRCS) deps.svg README.md
 	@sbcl --non-interactive --no-sysinit --no-userinit \
 	--load ~/quicklisp/setup.lisp \
 	--load '(#| TMPL_VAR name |#).asd' \
