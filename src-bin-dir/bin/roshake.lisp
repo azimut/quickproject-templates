@@ -179,4 +179,3 @@ IR1 (deftransform), IR2 (VOP) information in the infodb."
 (delete-compiler-information-sbcl)
 (delete-debug-info)
 (delete-all-packages)
-

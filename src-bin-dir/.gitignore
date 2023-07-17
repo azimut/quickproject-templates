@@ -28,6 +28,7 @@ bin/*
 !bin/iconfile.svg
 !bin/default.desktop
 !bin/AppRun
+!bin/roshake.lisp
 
 # Emacs
 
