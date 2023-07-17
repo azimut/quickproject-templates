@@ -40,7 +40,7 @@ The default value contains the minimal blacklist.")
   ;; (when roswell:*main*
   ;;   (pushnew (package-name (symbol-package roswell:*main*))
   ;;            *package-blacklist* :test #'string=))
-  (pushnew (package-name (symbol-package '(#| TMPL_VAR name |#):start))
+  (pushnew (package-name (symbol-package '(#| TMPL_VAR name |#):main))
            *package-blacklist*
            :test #'string=)
   (pushnew (package-name (symbol-package 'cl-user))
@@ -178,4 +178,4 @@ IR1 (deftransform), IR2 (VOP) information in the infodb."
 ;; (delete-compiler-macro-definitions)
 ;; (delete-compiler-information-sbcl)
 ;; (delete-debug-info)
-;; (delete-all-packages)
+;; (delete-all-packages) ;; does NOT work as it is for ASDF :bin-inferred, it deletes non-exported (BAR)

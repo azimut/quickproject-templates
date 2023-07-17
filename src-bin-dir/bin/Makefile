@@ -3,41 +3,38 @@ SBCL_HOME ?= /usr/lib/sbcl
 SBCL_COMPRESSION ?= nil
 export SBCL_HOME
 
-.PHONY: strip clean tar
-
-.PHONY: simple
-simple:
+(#| TMPL_VAR name |#):
 	$(SBCL_BIN) --non-interactive --no-sysinit --no-userinit \
              --load ~/quicklisp/setup.lisp \
              --load '../(#| TMPL_VAR name |#).asd' \
              --eval '(ql:quickload :(#| TMPL_VAR name |#))' \
              --eval "(sb-ext:save-lisp-and-die \"(#| TMPL_VAR name |#)\" :toplevel #'(#| TMPL_VAR name |#):start :executable t :compression $(SBCL_COMPRESSION) :purify t)"
 
-.PHONY: deploy
-deploy:
+deploy/(#| TMPL_VAR name |#):
 	$(SBCL_BIN) --non-interactive --no-sysinit --no-userinit \
              --load ~/quicklisp/setup.lisp \
              --load '../(#| TMPL_VAR name |#).asd' \
              --eval '(ql:quickload :(#| TMPL_VAR name |#)/deploy)' \
              --eval '(push :deploy-console *features*)' \
              --eval '(asdf:make :(#| TMPL_VAR name |#)/deploy :verbose t :force t)'
-	echo 'chmod +x (#| TMPL_VAR name |#); LD_PRELOAD="`echo ./*.so*`" ./(#| TMPL_VAR name |#)' > (#| TMPL_VAR name |#)-deploy/run.sh
+	echo 'chmod +x (#| TMPL_VAR name |#); LD_PRELOAD="`echo ./*.so*`" ./(#| TMPL_VAR name |#)' > deploy/run.sh
 
-.PHONY: standalone
-standalone:
+appimagetool:
+	wget -c -O appimagetool 'https://github.com/AppImage/AppImageKit/releases/download/12/appimagetool-x86_64.AppImage'
+	chmod +x appimagetool
+
+(#| TMPL_VAR name |#).AppImage: appimagetool deploy/(#| TMPL_VAR name |#) AppRun iconfile.svg default.desktop
+	install -D default.desktop deploy/(#| TMPL_VAR name |#).desktop
+	install -D AppRun          deploy/AppRun
+	install -D iconfile.svg    deploy/iconfile.svg
+	ARCH=x86_64 ./appimagetool -v deploy (#| TMPL_VAR name |#).AppImage
+
+standalone/(#| TMPL_VAR name |#):
 	$(SBCL_BIN) --non-interactive --no-sysinit --no-userinit \
              --load ~/quicklisp/setup.lisp \
              --load '../(#| TMPL_VAR name |#).asd' \
              --eval '(ql:quickload :(#| TMPL_VAR name |#)/standalone)' \
              --eval '(asdf:make :(#| TMPL_VAR name |#)/standalone :verbose t :force t)'
-
-(#| TMPL_VAR name |#).AppImage: AppDir/(#| TMPL_VAR name |#) AppRun iconfile.svg (#| TMPL_VAR name |#).desktop
-	wget -c -O ~/Downloads/appimagetool https://github.com/AppImage/AppImageKit/releases/download/12/appimagetool-x86_64.AppImage
-	chmod +x ~/Downloads/appimagetool
-	install -D (#| TMPL_VAR name |#).desktop AppDir/(#| TMPL_VAR name |#).desktop
-	install -D AppRun         AppDir/AppRun
-	install -D iconfile.svg   AppDir/iconfile.svg
-	ARCH=x86_64 ~/Downloads/appimagetool -v AppDir (#| TMPL_VAR name |#).AppImage
 
 .PHONY: static
 static:
@@ -65,6 +62,13 @@ static:
 		--core '/tmp/(#| TMPL_VAR name |#).core' \
 		--eval '(sb-ext:save-lisp-and-die "/tmp/(#| TMPL_VAR name |#)" :executable t :toplevel (lambda () ((#| TMPL_VAR name |#):start)) :compression $(SBC_COMPRESSION) :purify t)'
 
+.PHONY: simple deploy standalone static
+
+simple: simple/(#| TMPL_VAR name |#)
+deploy: deploy/(#| TMPL_VAR name |#)
+standalone: standalone/(#| TMPL_VAR name |#)
+
+.PHONY: strip tar clean
 strip:
 	find . -name '*.so*' -exec strip {} \;
 

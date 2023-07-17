@@ -3,16 +3,14 @@ SBCL_HOME ?= /usr/lib/sbcl
 SBCL_COMPRESSION ?= nil
 export SBCL_HOME
 
-.PHONY: simple deploy standalone static
-
-simple:
+(#| TMPL_VAR name |#):
 	$(SBCL_BIN) --non-interactive --no-sysinit --no-userinit \
              --load ~/quicklisp/setup.lisp \
              --load '../(#| TMPL_VAR name |#).asd' \
              --eval '(ql:quickload :(#| TMPL_VAR name |#))' \
              --eval "(sb-ext:save-lisp-and-die \"(#| TMPL_VAR name |#)\" :toplevel #'(#| TMPL_VAR name |#):main :executable t :compression $(SBCL_COMPRESSION) :purify t)"
 
-deploy:
+deploy/(#| TMPL_VAR name |#):
 	$(SBCL_BIN) --non-interactive --no-sysinit --no-userinit \
              --load ~/quicklisp/setup.lisp \
              --load '../(#| TMPL_VAR name |#).asd' \
@@ -21,22 +19,28 @@ deploy:
              --eval '(asdf:make :(#| TMPL_VAR name |#)/deploy :verbose t :force t)'
 	echo 'chmod +x (#| TMPL_VAR name |#); LD_PRELOAD="`echo ./*.so*`" ./(#| TMPL_VAR name |#)' > deploy/run.sh
 
-standalone:
+appimagetool:
+	wget -c -O appimagetool 'https://github.com/AppImage/AppImageKit/releases/download/12/appimagetool-x86_64.AppImage'
+	chmod +x appimagetool
+
+(#| TMPL_VAR name |#).AppImage: appimagetool deploy/(#| TMPL_VAR name |#) AppRun iconfile.svg default.desktop
+	install -D default.desktop deploy/(#| TMPL_VAR name |#).desktop
+	install -D AppRun          deploy/AppRun
+	install -D iconfile.svg    deploy/iconfile.svg
+	ARCH=x86_64 ./appimagetool -v deploy (#| TMPL_VAR name |#).AppImage
+
+standalone/(#| TMPL_VAR name |#):
 	$(SBCL_BIN) --non-interactive --no-sysinit --no-userinit \
              --load ~/quicklisp/setup.lisp \
              --load '../(#| TMPL_VAR name |#).asd' \
              --eval '(ql:quickload :(#| TMPL_VAR name |#)/standalone)' \
              --eval '(asdf:make :(#| TMPL_VAR name |#)/standalone :verbose t :force t)'
 
-appimagetool:
-	wget -c -O appimagetool 'https://github.com/AppImage/AppImageKit/releases/download/12/appimagetool-x86_64.AppImage'
-	chmod +x appimagetool
+.PHONY: simple deploy standalone static
 
-(#| TMPL_VAR name |#).AppImage: appimagetool AppDir/(#| TMPL_VAR name |#) AppRun iconfile.svg default.desktop
-	install -D default.desktop AppDir/(#| TMPL_VAR name |#).desktop
-	install -D AppRun          AppDir/AppRun
-	install -D iconfile.svg    AppDir/iconfile.svg
-	ARCH=x86_64 ~/Downloads/appimagetool -v AppDir (#| TMPL_VAR name |#).AppImage
+simple: simple/(#| TMPL_VAR name |#)
+deploy: deploy/(#| TMPL_VAR name |#)
+standalone: standalone/(#| TMPL_VAR name |#)
 
 static:
 	$(SBCL_BIN) --non-interactive --no-sysinit --no-userinit \
