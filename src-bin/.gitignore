@@ -24,7 +24,6 @@
 # End of https://www.toptal.com/developers/gitignore/api/commonlisp
 
 bin/*
-!bin/Makefile
 !bin/iconfile.svg
 !bin/default.desktop
 !bin/AppRun
