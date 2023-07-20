@@ -36,8 +36,7 @@ bin/standalone/(#| TMPL_VAR name |#):
              --eval '(ql:quickload :(#| TMPL_VAR name |#)/standalone)' \
              --eval '(asdf:make :(#| TMPL_VAR name |#)/standalone :verbose t :force t)'
 
-.PHONY: static
-static:
+bin/(#| TMPL_VAR name |#)-static:
 	$(SBCL_BIN) --non-interactive --no-sysinit --no-userinit \
 	     --load ~/quicklisp/setup.lisp \
 	     --eval "(pushnew \"$PWD/\" ql:*local-project-directories*)" \
@@ -60,13 +59,14 @@ static:
 	    $LIBS
 	/tmp/static-sbcl --non-interactive \
 		--core '/tmp/(#| TMPL_VAR name |#).core' \
-		--eval '(sb-ext:save-lisp-and-die "/tmp/(#| TMPL_VAR name |#)" :executable t :toplevel (lambda () ((#| TMPL_VAR name |#):start)) :compression $(SBC_COMPRESSION) :purify t)'
+		--eval '(sb-ext:save-lisp-and-die "bin/(#| TMPL_VAR name |#)-static" :executable t :toplevel (lambda () ((#| TMPL_VAR name |#):start)) :compression $(SBC_COMPRESSION) :purify t)'
 
 .PHONY: simple deploy standalone static appimage
 simple:     bin/(#| TMPL_VAR name |#)
 deploy:     bin/deploy/(#| TMPL_VAR name |#)
 appimage:   bin/(#| TMPL_VAR name |#).AppImage
 standalone: bin/standalone/(#| TMPL_VAR name |#)
+static:     bin/(#| TMPL_VAR name |#)-static
 
 .PHONY: clean tar
 tar: (#| TMPL_VAR name |#).tgz

@@ -50,7 +50,7 @@ jobs:
         with:
           name: (#| TMPL_VAR name |#)-linux-x86_64-static
           path: |
-            /tmp/(#| TMPL_VAR name |#)
+            bin/(#| TMPL_VAR name |#)-static
           if-no-files-found: error
 
       - name: DEBUG SHELL
