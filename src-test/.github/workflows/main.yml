@@ -15,10 +15,48 @@ jobs:
 
       - uses: actions/checkout@v3
 
-      - uses: 40ants/setup-lisp@v2
-        with:
-          asdf-system: (#| TMPL_VAR name |#)
+      - name: apt-get
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y sbcl wget
 
-      - uses: 40ants/run-tests@v2
+      - name: mkdir cache dirs
+        run: |
+          mkdir -pv ~/Downloads
+          mkdir -pv ~/quicklisp
+          mkdir -pv ~/.cache/common-lisp
+        shell: bash
+      - name: Get Current Month
+        id: current-month
+        run: echo "::set-output name=value::$(date -u '+%Y-%m')"
+      - name: Cache SBCL Setup
+        id: cache
+        uses: actions/cache@v2
+        env:
+          cache-name: "cache-sbcl-${{ env.SBCL_VERSION }}-(#| TMPL_VAR name |#)"
         with:
-          asdf-system: (#| TMPL_VAR name |#)
+          path: |
+            ~/Downloads/
+            ~/quicklisp
+            ~/.cache/common-lisp/
+          key: "${{ steps.current-month.outputs.value }}-${{ env.cache-name }}-${{ matrix.os }}"
+
+      - name: Install quicklisp
+        run: |
+          cd ~/Downloads
+          wget https://beta.quicklisp.org/quicklisp.lisp
+          sbcl --non-interactive \
+               --eval '(load "quicklisp.lisp")' \
+               --eval '(quicklisp-quickstart:install)' \
+               --eval '(ql-util:without-prompting (ql:add-to-init-file))' \
+               --eval '(ql:update-all-dists)'
+        shell: bash
+        if: steps.cache.outputs.cache-hit != 'true'
+
+      - name: Load
+        run: |
+          sbcl --non-interactive --load ~/quicklisp/setup.lisp --eval '(ql:quickload :(#| TMPL_VAR name |#))'
+
+      - name: Test
+        run: |
+          make test
