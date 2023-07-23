@@ -55,6 +55,7 @@ jobs:
             ~/quicklisp
             ~/sbcl
             ~/.cache/common-lisp/
+            ~/AppData/Local/cache/common-lisp
           key: "${{ steps.current-month.outputs.value }}-${{ env.cache-name }}-${{ matrix.os }}"
       - name: Restore Path To Cached Files
         run: |

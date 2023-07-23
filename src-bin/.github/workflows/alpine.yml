@@ -60,13 +60,13 @@ jobs:
 
       - name: make static
         run: |
-          make static
+          make static SBCL_BIN="$HOME/build/sbcl/bin/sbcl" SBCL_HOME="$HOME/build/sbcl/lib/sbcl"
 
       - uses: actions/upload-artifact@v2
         with:
-          name: sbcl-static-gmp
+          name: sbcl-static
           path: |
-            /tmp
+            bin/(#| TMPL_VAR name |#)-static
           if-no-files-found: error
 
       - name: DEBUG SHELL
