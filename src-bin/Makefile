@@ -1,3 +1,4 @@
+OS ?= Linux
 SBCL_BIN ?= /usr/bin/sbcl
 SBCL_HOME ?= /usr/lib/sbcl
 SBCL_COMPRESSION ?= nil
@@ -69,7 +70,7 @@ standalone: bin/standalone/(#| TMPL_VAR name |#)
 static:     bin/(#| TMPL_VAR name |#)-static
 
 .PHONY: clean tar
-tar: (#| TMPL_VAR name |#).tgz
+tar: (#| TMPL_VAR name |#)-$(OS).tgz
 clean:; rm -vrf ./bin/deploy ./bin/standalone ./bin/(#| TMPL_VAR name |#) ./*tgz
-(#| TMPL_VAR name |#).tgz: bin/deploy/(#| TMPL_VAR name |#)
-	tar cvzf (#| TMPL_VAR name |#).tgz bin/deploy --transform s/bin\\/deploy/(#| TMPL_VAR name |#)/
+(#| TMPL_VAR name |#)-$(OS).tgz: bin/deploy/(#| TMPL_VAR name |#)
+	tar cvzf (#| TMPL_VAR name |#)-$(OS).tgz bin/deploy --transform s/bin\\/deploy/(#| TMPL_VAR name |#)/

@@ -112,13 +112,18 @@ jobs:
         shell: bash
         if: steps.cache.outputs.cache-hit != 'true'
 
-      - name: Build Binary
+      - name: Build Binary # appimage won't work on Windows
         run: |
           export PATH="$HOME/sbcl/bin:${PATH}"
           cd bin/
           make simple     SBCL_BIN="$HOME/sbcl/bin/sbcl"
           make deploy     SBCL_BIN="$HOME/sbcl/bin/sbcl"
           make standalone SBCL_BIN="$HOME/sbcl/bin/sbcl" SBCL_HOME="$HOME/sbcl/lib/sbcl"
+
+      - uses: vimtor/action-zip@v1
+        with:
+          files: bin/deploy
+          dest: scenic-${{ matrix.os }}.zip
 
       - name: Dev Release
         uses: marvinpinto/action-automatic-releases@latest
@@ -129,9 +134,9 @@ jobs:
           prerelease: true
           title: "Development ${{ matrix.os }} Build"
           files: |
+            scenic-${{ matrix.os }}.zip
             bin/(#| TMPL_VAR name |#)
             bin/standalone/(#| TMPL_VAR name |#)
-            bin/deploy
             LICENSE
 
       - name: Stable Release
@@ -141,9 +146,9 @@ jobs:
           prerelease: false
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
           files: |
+            scenic-${{ matrix.os }}.zip
             bin/(#| TMPL_VAR name |#)
             bin/standalone/(#| TMPL_VAR name |#)
-            bin/deploy
             LICENSE
 
       - name: DEBUG SHELL
