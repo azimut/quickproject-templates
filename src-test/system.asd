@@ -2,6 +2,9 @@
   :description "Describe (#| TMPL_VAR name |#) here"
   :author "(#| TMPL_VAR author |#)"
   :license  "(#| TMPL_VAR license |#)"
+  :source-control (:git "https://github.com/azimut/(#| TMPL_VAR name |#)")
+  :bug-tracker "https://github.com/azimut/(#| TMPL_VAR name |#)/issues"
+  :homepage "https://azimut.github.io/(#| TMPL_VAR name |#)/"
   :version "0.0.1"
   :serial t
   :depends-on (#:defpackage-plus)
