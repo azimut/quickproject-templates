@@ -5,7 +5,7 @@
   :author "(#| TMPL_VAR author |#)"
   :license  "(#| TMPL_VAR license |#)"
   :version "0.0.1"
-  :depends-on (#:(#| TMPL_VAR name |#)/main))
+  :depends-on (#:trivial-package-local-nicknames #:(#| TMPL_VAR name |#)/main))
 
 (asdf:defsystem #:(#| TMPL_VAR name |#)/standalone
   :depends-on (#:(#| TMPL_VAR name |#))
