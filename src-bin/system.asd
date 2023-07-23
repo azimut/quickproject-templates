@@ -24,3 +24,10 @@
   :build-operation :deploy-op
   :build-pathname "deploy/(#| TMPL_VAR name |#)"
   :entry-point "(#| TMPL_VAR name |#):start")
+
+(asdf:defsystem #:(#| TMPL_VAR name |#)/test
+  :depends-on (#:(#| TMPL_VAR name |#) #:parachute)
+  :pathname "t"
+  :components ((:file "package")
+               (:file "tests"))
+  :perform (asdf:test-op (op c) (uiop:symbol-call :parachute :test :(#| TMPL_VAR name |#)-test)))
