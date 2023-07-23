@@ -77,7 +77,7 @@ clean:; rm -vrf ./bin/deploy ./bin/standalone ./bin/(#| TMPL_VAR name |#) ./*tgz
 
 .PHONY: test
 test: $(SRCS) $(TESTS)
-	@sbcl --non-interactive --no-sysinit --no-userinit \
+	@$(SBCL_BIN) --non-interactive --no-sysinit --no-userinit \
 	--load ~/quicklisp/setup.lisp \
 	--load '(#| TMPL_VAR name |#).asd' \
 	--eval "(ql:quickload :(#| TMPL_VAR name |#)/test)" \
@@ -87,14 +87,14 @@ test: $(SRCS) $(TESTS)
 doc: docs/index.html
 
 docs/index.html: $(SRCS) deps.svg README.md
-	@sbcl --non-interactive --no-sysinit --no-userinit \
+	@$(SBCL_BIN) --non-interactive --no-sysinit --no-userinit \
 	--load ~/quicklisp/setup.lisp \
 	--load '(#| TMPL_VAR name |#).asd' \
 	--eval "(ql:quickload '(:staple :staple-markdown))" \
 	--eval '(staple:generate :(#| TMPL_VAR name |#) :if-exists :supersede)'
 
 deps.svg: (#| TMPL_VAR name |#).asd
-	@sbcl --non-interactive --no-sysinit --no-userinit \
+	@$(SBCL_BIN) --non-interactive --no-sysinit --no-userinit \
 	--load ~/quicklisp/setup.lisp \
 	--load '(#| TMPL_VAR name |#).asd' \
 	--eval '(ql:quickload :asdf-dependency-graph)' \
