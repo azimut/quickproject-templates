@@ -4,6 +4,7 @@ on:
     paths-ignore:
       - 'LICENSE'
       - 'README.md'
+      - '.github/workflows/build.yml'
 jobs:
   container:
     runs-on: ubuntu-latest
@@ -26,7 +27,7 @@ jobs:
             ~/build
             ~/quicklisp
             ~/.cache/common-lisp
-          key: "${{ steps.current-month.outputs.value }}-${{ env.cache-name }}-${{ runner.os }}"
+          key: "${{ steps.current-month.outputs.value }}-${{ env.cache-name }}"
 
       - name: First time Install quicklisp
         run: |

@@ -4,6 +4,7 @@ on:
     paths-ignore:
       - 'LICENSE'
       - 'README.md'
+      - '.github/workflows/static.yml'
 jobs:
   build:
     strategy:
