@@ -124,7 +124,7 @@ jobs:
       - uses: vimtor/action-zip@v1
         with:
           files: bin/deploy
-          dest: scenic-${{ matrix.os }}.zip
+          dest: (#| TMPL_VAR name |#)-${{ matrix.os }}.zip
 
       - name: Dev Release
         uses: marvinpinto/action-automatic-releases@latest
@@ -135,7 +135,7 @@ jobs:
           prerelease: true
           title: "Development ${{ matrix.os }} Build"
           files: |
-            scenic-${{ matrix.os }}.zip
+            (#| TMPL_VAR name |#)-${{ matrix.os }}.zip
             bin/(#| TMPL_VAR name |#)
             bin/standalone/(#| TMPL_VAR name |#)
             LICENSE
@@ -147,7 +147,7 @@ jobs:
           prerelease: false
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
           files: |
-            scenic-${{ matrix.os }}.zip
+            (#| TMPL_VAR name |#)-${{ matrix.os }}.zip
             bin/(#| TMPL_VAR name |#)
             bin/standalone/(#| TMPL_VAR name |#)
             LICENSE
