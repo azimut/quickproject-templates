@@ -1,4 +1,6 @@
 (asdf:defsystem #:(#| TMPL_VAR name |#)
+  ;;:class :package-inferred-system ; REMOVE :components
+  ;;:depends-on (#:trivial-package-local-nicknames #:(#| TMPL_VAR name |#)/main)
   :description "Describe (#| TMPL_VAR name |#) here"
   :author "(#| TMPL_VAR author |#)"
   :license  "(#| TMPL_VAR license |#)"
