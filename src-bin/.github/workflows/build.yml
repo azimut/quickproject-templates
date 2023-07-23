@@ -13,9 +13,9 @@ jobs:
     runs-on: ${{ matrix.os }}
     env:
       SBCL_VERSION: 2.1.9
+      VCPKG_MAX_CONCURRENCY: 1
       VCPKG_CONCURRENCY: 1
       VCPKG_DEFAULT_TRIPLET: x64-windows
-      VCPKG_MAX_CONCURRENCY: 1
       VCPKG_FEATURE_FLAGS: fastbuild,versions
     steps:
 
@@ -118,8 +118,9 @@ jobs:
           export PATH="$HOME/sbcl/bin:${PATH}"
           cd bin/
           make simple     SBCL_BIN="$HOME/sbcl/bin/sbcl"
-          make deploy     SBCL_BIN="$HOME/sbcl/bin/sbcl"
           make standalone SBCL_BIN="$HOME/sbcl/bin/sbcl" SBCL_HOME="$HOME/sbcl/lib/sbcl"
+          make deploy     SBCL_BIN="$HOME/sbcl/bin/sbcl"
+          mv deploy (#| TMPL_VAR name |#)-${{ matrix.os }}
 
       - uses: vimtor/action-zip@v1
         with:

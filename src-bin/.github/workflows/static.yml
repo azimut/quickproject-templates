@@ -17,11 +17,11 @@ jobs:
       - name: Get Current Month
         id: current-month
         run: echo "::set-output name=value::$(date -u '+%Y-%m')"
-      - name: Cache SBCL 2.1.9 Setup
+      - name: Cache SBCL Gantoo Setup
         id: cache
         uses: actions/cache@v2
         env:
-          cache-name: cache-sbcl-2.1.9-musl-(#| TMPL_VAR name |#)
+          cache-name: cache-sbcl-Gantoo-musl-(#| TMPL_VAR name |#)
         with:
           path: |
             ~/build
