@@ -1,4 +1,4 @@
-name: Windows Build (#| TMPL_VAR name |#)
+name: Windows & Linux Build (#| TMPL_VAR name |#)
 on:
   push:
     paths-ignore:
@@ -6,23 +6,37 @@ on:
       - 'README.md'
 jobs:
   build:
-    #if: ${{ false }}  # disable for now
-    runs-on: windows-2016
+    strategy:
+      matrix:
+        os: [ ubuntu-20.04, windows-2019 ]
+    runs-on: ${{ matrix.os }}
     env:
+      SBCL_VERSION: 2.1.9
       VCPKG_CONCURRENCY: 1
       VCPKG_DEFAULT_TRIPLET: x64-windows
       VCPKG_MAX_CONCURRENCY: 1
       VCPKG_FEATURE_FLAGS: fastbuild,versions
     steps:
+
       - uses: actions/checkout@v2
         with:
-          fetch-depth: 0
-      - name: mkdir
+          fetch-depth: 0 # to fetch tags
+
+      - name: apt-get
+        if: runner.os == 'Linux'
         run: |
-          mkdir -p ~/Downloads
-          mkdir -p ~/quicklisp
-          mkdir -p ~/.cache/common-lisp
-          mkdir -p ~/sbcl
+          sudo apt-get update
+          sudo apt-get install -y sbcl wget
+      - name: choco
+        if: runner.os == 'Windows'
+        run: choco install lessmsi make 7zip wget
+
+      - name: mkdir cache dirs
+        run: |
+          mkdir -pv ~/Downloads
+          mkdir -pv ~/sbcl
+          mkdir -pv ~/quicklisp
+          mkdir -pv ~/.cache/common-lisp
           mkdir -p ~/AppData/Local/cache/common-lisp
         shell: bash
 
@@ -33,61 +47,55 @@ jobs:
         id: cache
         uses: actions/cache@v2
         env:
-          cache-name: cache-sbcl-2.1.9
+          cache-name: "cache-sbcl-${{ env.SBCL_VERSION }}-(#| TMPL_VAR name |#)"
         with:
           path: |
             ~/Downloads/
             ~/quicklisp
-            ~/.cache/common-lisp/
             ~/sbcl
-            ~/AppData/Local/cache/common-lisp
-          key: "${{ steps.current-month.outputs.value }}-${{ env.cache-name }}-${{ runner.os }}"
+            ~/.cache/common-lisp/
+          key: "${{ steps.current-month.outputs.value }}-${{ env.cache-name }}-${{ matrix.os }}"
       - name: Restore Path To Cached Files
         run: |
           echo $HOME/sbcl/bin >> $GITHUB_PATH
         if: steps.cache.outputs.cache-hit == 'true'
 
-      - run: choco install lessmsi make 7zip wget
-      - name: Write vcpkg.json
-        uses: DamianReeves/write-file-action
-        with:
-          path: vcpkg.json
-          contents: |
-            {
-                "name": "example",
-                "version-string": "0.0.1",
-                "builtin-baseline": "843e0ba0d8f9c9c572e45564263eedfc7745e74f",
-                "dependencies": [
-                    "zlib",
-                ]
-            }
-      - uses: lukka/run-vcpkg@v10
-        with:
-          runVcpkgFormatString: '[`install`, `--recurse`, `--x-install-root`, `$[env.VCPKG_INSTALLED_DIR]`, `--triplet`, `$[env.VCPKG_DEFAULT_TRIPLET]`]'
-          vcpkgGitCommitId: 843e0ba0d8f9c9c572e45564263eedfc7745e74f
-          runVcpkgInstall: true
-      - run: cp -v vcpkg/packages/*/bin/*.dll C:/windows/system32/
+      # - name: Write vcpkg.json
+      #   if: runner.os == 'Windows'
+      #   uses: DamianReeves/write-file-action
+      #   with:
+      #     path: vcpkg.json
+      #     contents: |
+      #       {
+      #           "name": "example",
+      #           "version-string": "0.0.1",
+      #           "builtin-baseline": "5b1214315250939257ef5d62ecdcbca18cf4fb1c",
+      #           "dependencies": [
+      #               "zlib",
+      #           ]
+      #       }
+      # - uses: lukka/run-vcpkg@v11
+      #   if: runner.os == 'Windows'
+      #   with:
+      #     runVcpkgFormatString: '[`install`, `--recurse`, `--x-install-root`, `$[env.VCPKG_INSTALLED_DIR]`, `--triplet`, `$[env.VCPKG_DEFAULT_TRIPLET]`]'
+      #     vcpkgGitCommitId: 5b1214315250939257ef5d62ecdcbca18cf4fb1c
+      #     runVcpkgInstall: true
+      # - run: cp -v vcpkg/packages/*/bin/*.dll C:/windows/system32/
+      #   if: runner.os == 'Windows'
 
-      - name: Install Bootstraping SBCL 1.4.14
+      - name: Download SBCL ${{ env.SBCL_VERSION }}
         run: |
           cd ~/Downloads
-          wget http://prdownloads.sourceforge.net/sbcl/sbcl-1.4.14-x86-64-windows-binary.msi
-          lessmsi x sbcl-1.4.14-x86-64-windows-binary.msi
-          mv "sbcl-1.4.14-x86-64-windows-binary/SourceDir/PFiles/Steel Bank Common Lisp/1.4.14" sbcl_bin
+          wget http://downloads.sourceforge.net/project/sbcl/sbcl/${{ env.SBCL_VERSION }}/sbcl-${{ env.SBCL_VERSION }}-source.tar.bz2
+          tar xjf sbcl-${{ env.SBCL_VERSION }}-source.tar.bz2
         if: steps.cache.outputs.cache-hit != 'true'
 
-      - name: Install SBCL 2.1.9
+      - name: Install SBCL ${{ env.SBCL_VERSION }} # linkable-runtime needed for "standalone" build
         run: |
-          cd ~/Downloads
-          export SBCL_HOME="$PWD/sbcl_bin";
-          export PATH="$PWD/sbcl_bin:${PATH}";
-          wget http://downloads.sourceforge.net/project/sbcl/sbcl/2.1.9/sbcl-2.1.9-source.tar.bz2
-          tar xjf sbcl-2.1.9-source.tar.bz2
-          cd sbcl-2.1.9
+          cd ~/Downloads/sbcl-${{ env.SBCL_VERSION }}
           sh make.sh --fancy --with-sb-linkable-runtime
           unset SBCL_HOME
           INSTALL_ROOT=~/sbcl ./install.sh
-        shell: bash
         if: steps.cache.outputs.cache-hit != 'true'
 
       - name: Install quicklisp
@@ -119,10 +127,10 @@ jobs:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
           automatic_release_tag: "latest"
           prerelease: true
-          title: "Development Build"
+          title: "Development ${{ matrix.os }} Build"
           files: |
             bin/(#| TMPL_VAR name |#)
-            bin/standalone
+            bin/standalone/(#| TMPL_VAR name |#)
             bin/deploy
             LICENSE
 
@@ -134,7 +142,7 @@ jobs:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
           files: |
             bin/(#| TMPL_VAR name |#)
-            bin/standalone
+            bin/standalone/(#| TMPL_VAR name |#)
             bin/deploy
             LICENSE
 
